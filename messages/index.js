@@ -77,10 +77,11 @@ var bot = new builder.UniversalBot(connector, [
 		cards.push(createThumbnailCard(session, "images/customerservice.jpg",'', 'customerService','Customer Service- Refund, Cancel, Order Status Inquiry','Initiate Service Request'));
 		cards.push(createThumbnailCard(session, 'http://www.woodtel.com/thumbnail.jpg','', 'initiateBrowsing','Browse and Shop for Products','Shop Now'));
 		var reply = new builder.Message(session)
-            .text('Our chat agent can help you in following activities')
+            .text('Our chat agent can help you in following activities.')
             .attachmentLayout(builder.AttachmentLayout.list)
             .attachments(cards);
         session.send(reply);
+		//session.beginDialog('generalConversation');
 		/*
 		var intent='';
 		LUISclient.predict(session.message.text, {
@@ -269,6 +270,90 @@ bot.dialog('conversationwithuser', [
 	
 ]);
 
+bot.dialog('generalConversation', [
+
+
+	function (session) {
+		var inputMessage=session.message.text;
+		console.log('Starting generalConversation is %s',session.message.text);
+		if(inputMessage.indexOf('action?') == -1) {
+
+		
+		console.log('Starting generalConversation is %s',session.message.text);
+		console.log('Session state in generalConversation is %s',session.sessionState.callstack.state);
+		console.log('Session Reset in generalConversation is %s',session.isReset());
+		console.log('Session messageSent in generalConversation is %s',session.messageSent());
+		console.log('tesxt to search is %s',session.message.text);
+		var intent='';
+		LUISclient.predict(session.message.text, {
+
+				//On success of prediction
+					onSuccess: function (response) {
+					intent = response.topScoringIntent.intent;
+					console.log('intent received is %s',response.topScoringIntent.intent);
+					console.log('Intent is:. %s',intent);
+		
+					var messageToSend=getTextForIntent(intent);
+					session.send(messageToSend);
+					
+					//printOnSuccess(response);
+					
+			},
+
+			//On failure of prediction
+					onFailure: function (err) {
+					console.error(err);
+			}
+		});
+		
+		
+        //session.beginDialog('conversationwithuser');
+	}else{
+		console.log('Not entering as started from other conversation');
+    }
+	},
+	
+    function (session, results) {
+		console.log('Session state in two is %s',session.sessionState.callstack.state);
+		console.log('Session Reset in two is %s',session.isReset());
+		console.log('tesxt to search is %s',results.response);
+        //session.dialogData.reservationDate = builder.EntityRecognizer.resolveTime([results.response]);
+		
+		
+		var intent='';
+		LUISclient.predict(results.response, {
+
+				//On success of prediction
+					onSuccess: function (response) {
+					var intent = response.topScoringIntent.intent;
+					console.log('intent received is %s',response.topScoringIntent.intent);
+					//printOnSuccess(response);
+					console.log('Intent is:. %s',intent);
+		
+					var messageToSend=getTextForIntent(intent);
+					session.send(messageToSend);
+					
+			},
+
+			//On failure of prediction
+					onFailure: function (err) {
+					console.error(err);
+			}
+		});
+		/*
+		console.log('Intent is:. %s',intent);
+		//session.routeToActiveDialog(results);
+		session.send('Intent is:. %s',intent);*/
+		//builder.Prompts.text(session, 'Intent is:. %s',intent);
+		
+		
+        //builder.Prompts.text(session, "How many people are in your party?");
+
+    }
+	
+]);
+
+
 bot.dialog('SubsequentConversation', [
 
 	function (session, args) {
@@ -307,6 +392,7 @@ bot.dialog('/initiateBrowsing', [
             .attachmentLayout(builder.AttachmentLayout.carousel)
             .attachments(cards);
         session.send(reply);
+		session.beginDialog('generalConversation');
        
     },
     function (session, results) {
@@ -315,8 +401,9 @@ bot.dialog('/initiateBrowsing', [
 
         var message = 'DUMMY Conversation SEARCH RESULT --'+destination;
         
-		builder.Prompts.text(session, message);
+		//builder.Prompts.text(session, message);
         //session.send(message, destination);
+		session.beginDialog('generalConversation');
 
     }
 	
@@ -339,8 +426,9 @@ bot.dialog('/customerService', [
 
         var message = 'Customer service results';
         
-		builder.Prompts.text(session, message);
+		//builder.Prompts.text(session, message);
         //session.send(message, destination);
+		session.beginDialog('generalConversation');
 
     }
 	
@@ -363,10 +451,11 @@ bot.dialog('/listPopularWomenProduct', [
         var destination = results.response;
 		console.log('Conversation In session,results');
 
-        var message = 'Customer service results';
+        var message = 'In women product result';
         
-		builder.Prompts.text(session, message);
+		//builder.Prompts.text(session, message);
         //session.send(message, destination);
+		session.beginDialog('generalConversation');
 
     }
 	
@@ -389,16 +478,18 @@ bot.dialog('/listPopularMenProduct', [
             .attachmentLayout(builder.AttachmentLayout.carousel)
             .attachments(cards);
         session.send(reply);
+		session.beginDialog('generalConversation');
        
     },
     function (session, results) {
         var destination = results.response;
 		console.log('Conversation In session,results');
 
-        var message = 'Customer service results';
+        var message = 'In men product result 2';
         
-		builder.Prompts.text(session, message);
+		//builder.Prompts.text(session, message);
         //session.send(message, destination);
+		session.beginDialog('generalConversation');
 
     }
 	
@@ -419,10 +510,11 @@ bot.dialog('/listPopularBoysProduct', [
         var destination = results.response;
 		console.log('Conversation In session,results');
 
-        var message = 'Customer service results';
+        var message = 'In boys product result';
         
-		builder.Prompts.text(session, message);
+		//builder.Prompts.text(session, message);
         //session.send(message, destination);
+		session.beginDialog('generalConversation');
 
     }
 	
@@ -444,10 +536,11 @@ bot.dialog('/addToCart', [
         var destination = results.response;
 		console.log('Conversation In session,results');
 
-        var message = 'Customer service results';
+        var message = 'In add to cart result 2';
         
-		builder.Prompts.text(session, message);
+		//builder.Prompts.text(session, message);
         //session.send(message, destination);
+		session.beginDialog('generalConversation');
 
     }
 	

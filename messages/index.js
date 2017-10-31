@@ -375,12 +375,20 @@ bot.dialog('/listPopularMenProduct', [
 	//function (session){
 	//	builder.Prompts.text(session, 'In Initate Message start');
 	//},
-
+//createThumbnailCardForProducts(session,url,titleText,priceValue,pageUrl) 
 	function (session, args) {
-		console.log('Conversation session, args, next');
-        //session.send('Welcome to the IoT: \'%s\'', session.message.text);
-		builder.Prompts.text(session, 'Welcome to Mens Product');
-        // try extracting entities
+		var cards = new Array();
+		cards.push(createThumbnailCardForProducts(session, "https://www.jcrew.com/s7-img-facade/02402_WX0408",'Slim Secret Wash heather poplin shirt','59.50','https://www.jcrew.com/p/mens_category/shirts/secretwash/slim-secret-wash-heather-poplin-shirt/02403?color_name=hthr-caravan-blue'));
+		cards.push(createThumbnailCardForProducts(session, "https://www.jcrew.com/s7-img-facade/H1618_WX0459",'Secret Wash shirt in heather poplin seaside check','55.50','https://www.jcrew.com/p/mens_category/shirts/secretwash/secret-wash-shirt-in-heather-poplin-seaside-check/H1618'));
+		cards.push(createThumbnailCardForProducts(session, "https://www.jcrew.com/s7-img-facade/G6974_WX0621",'Slim Secret Wash shirt in thick stripe','57.50','https://www.jcrew.com/p/mens_category/shirts/secretwash/slim-secret-wash-shirt-in-thick-stripe/G6975'));
+		cards.push(createThumbnailCardForProducts(session, "https://www.jcrew.com/s7-img-facade/G6986_WN9834",'Secret Wash shirt in warm spruce plaid','69.50','https://www.jcrew.com/p/mens_category/shirts/secretwash/secret-wash-shirt-in-warm-spruce-plaid/G6986'));
+		cards.push(createThumbnailCardForProducts(session, "https://www.jcrew.com/s7-img-facade/G6985_WX0431",'Slim heather poplin shirt in purple plaid','62.50','https://www.jcrew.com/p/mens_category/shirts/secretwash/slim-heather-poplin-shirt-in-purple-plaid/G6985'));
+		
+		var reply = new builder.Message(session)
+           // .text('Our chat agent can help you in following activities')
+            .attachmentLayout(builder.AttachmentLayout.carousel)
+            .attachments(cards);
+        session.send(reply);
        
     },
     function (session, results) {
@@ -419,6 +427,32 @@ bot.dialog('/listPopularBoysProduct', [
     }
 	
 ]);
+
+bot.dialog('/addToCart', [
+	//function (session){
+	//	builder.Prompts.text(session, 'In Initate Message start');
+	//},
+
+	function (session, args) {
+		console.log('Product chosen %s',args);
+        //session.send('Welcome to the IoT: \'%s\'', session.message.text);
+		builder.Prompts.text(session, 'Product Added to Cart');
+        // try extracting entities
+       
+    },
+    function (session, results) {
+        var destination = results.response;
+		console.log('Conversation In session,results');
+
+        var message = 'Customer service results';
+        
+		builder.Prompts.text(session, message);
+        //session.send(message, destination);
+
+    }
+	
+]);
+
 
 
 if (useEmulator) {
@@ -499,11 +533,31 @@ function createThumbnailCard(session,url,textMsg,actionName,titleText,buttonText
             builder.CardAction.dialogAction(session,actionName,"",buttonText)
         ]);
 }
+
+
+
+function createThumbnailCardForProducts(session,url,titleText,priceValue,pageUrl) {
+	
+    //return new builder.ThumbnailCard(session)
+	return new builder.HeroCard(session)
+        .title(titleText)
+        //.subtitle('Shop Now')
+        .text("$"+priceValue)
+		.images([
+            builder.CardImage.create(session, url)
+        ])
+        .buttons([
+            builder.CardAction.dialogAction(session,"addToCart","","Add to Cart"),
+			builder.CardAction.openUrl(session,pageUrl,"See in website")
+        ]);
+}
+
 bot.beginDialogAction('initiateBrowsing', '/initiateBrowsing'); 
 bot.beginDialogAction('customerService', '/customerService'); 
 bot.beginDialogAction('listPopularWomenProduct', '/listPopularWomenProduct'); 
 bot.beginDialogAction('listPopularMenProduct', '/listPopularMenProduct'); 
 bot.beginDialogAction('listPopularBoysProduct', '/listPopularBoysProduct'); 
+bot.beginDialogAction('addToCart', '/addToCart'); 
 
 /*
 function(response){

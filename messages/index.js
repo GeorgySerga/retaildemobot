@@ -579,10 +579,12 @@ function getTextForIntent(intentvalue){
 	var chatreplytext='';
 	if(intentvalue == 'Introduction'){
 		chatreplytext='We can help you in Following tasks 1. Customer service 2.Purchase 3.Product Recommendation';
-	}else if(intentvalue == 'assessmentdecision'){
-		chatreplytext='Please complete the Assement in http://techolution.com/iotAssessment to evalaute your current IoT maturity.';
+	}else if(intentvalue == 'offers'){
+		chatreplytext='Following offers are currently available 1. 10% off on all purchases above $200. 2. Free next day delivery on all orders above $100 3.Free shipping on all orders above $75';
+	}else{
+		chatreplytext='Please contact our customer support at 1-800-562-0258 to help you further.';
 	}
-	else if(intentvalue == 'assessment'){
+	/*else if(intentvalue == 'assessment'){
 		chatreplytext='Various industry leaders have started their IoT journey by first evaluating the needs and gaps. We can help you with that thorugh our assessment.';
 	}else if(intentvalue == 'assessmentneed'){
 		chatreplytext='Various industry leaders have started their IoT journey by first evaluating the needs and gaps. We can help you with that thorugh our assessment.';
@@ -607,7 +609,7 @@ function getTextForIntent(intentvalue){
 		chatreplytext='Our Initial assement test would act as SWOT analysis for your IoT skills and where you need to focus. Take our assessment from http://iotbootcamp.techolution.com';
 	}else{
 		chatreplytext='Welcome to Techolution. We are visionary IT consulting firm specializing in IoT and Analytics. We would be happy to help you.';
-	}
+	}*/
 	return chatreplytext;
 }
 

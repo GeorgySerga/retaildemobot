@@ -41,7 +41,8 @@ var builder = require("botbuilder");
 var botbuilder_azure = require("botbuilder-azure");
 var path = require('path');
 
-var useEmulator = (process.env.NODE_ENV == 'development');
+#var useEmulator = (process.env.NODE_ENV == 'development');
+var useEmulator = "True";
 
 console.log ('useEmulator %s',useEmulator);
 var connector = useEmulator ? new builder.ChatConnector() : new botbuilder_azure.BotServiceConnector({
@@ -52,11 +53,11 @@ var connector = useEmulator ? new builder.ChatConnector() : new botbuilder_azure
 });
 
 
-const APPID = "Enter your Application Id here";
-const APPKEY = "Enter your Subscription Key here";
+const APPID = "965baee4-cb00-4724-8d7d-98675c5cd6c4";
+const APPKEY = "181e01565f894894a05d4eb8c3d342ae";
 
 var LUISclient = LUISClient({
-  appId: '0b6be681-0677-48fe-9265-6abb21b5c859',
+  appId: '965baee4-cb00-4724-8d7d-98675c5cd6c4',
   appKey: '181e01565f894894a05d4eb8c3d342ae',
   verbose: true
 });
@@ -311,7 +312,7 @@ var printOnSuccess = function (response) {
 function getTextForIntent(intentvalue){
 	var chatreplytext='';
 	if(intentvalue == 'Introduction'){
-		chatreplytext='Welcome to Techolution. We are visionary IT consulting firm specializing in IoT and Analytics. We would be happy to help you.';
+		chatreplytext='We can help you in Following tasks 1. Customer service 2.Purchase 3.Product Recommendation';
 	}else if(intentvalue == 'assessmentdecision'){
 		chatreplytext='Please complete the Assement in http://techolution.com/iotAssessment to evalaute your current IoT maturity.';
 	}

@@ -57,7 +57,7 @@ const APPID = "Enter your Application Id here";
 const APPKEY = "Enter your Subscription Key here";
 
 var LUISclient = LUISClient({
-  appId: '0b6be681-0677-48fe-9265-6abb21b5c859',
+  appId: '965baee4-cb00-4724-8d7d-98675c5cd6c4',
   appKey: '181e01565f894894a05d4eb8c3d342ae',
   verbose: true
 });
@@ -67,11 +67,21 @@ var LUISclient = LUISClient({
 
 var bot = new builder.UniversalBot(connector, [
     function (session) {
-		console.log('Starting message is %s',session.message.text);
-		console.log('Session state in one is %s',session.sessionState.callstack.state);
-		console.log('Session Reset in one is %s',session.isReset());
-		console.log('Session messageSent in one is %s',session.messageSent());
+		console.log('Starting message new is %s',session.message.text);
+		console.log('Session state in new  one is %s',session.sessionState.callstack.state);
+		console.log('Session Reset in new one is %s',session.isReset());
+		console.log('Session messageSent new in one is %s',session.messageSent());
 		console.log('tesxt to search is %s',session.message.text);
+		
+		var cards = new Array();
+		cards.push(createThumbnailCard(session, "images/customerservice.jpg",'', 'customerService','Customer Service- Refund, Cancel, Order Status Inquiry','Initiate Service Request'));
+		cards.push(createThumbnailCard(session, 'http://www.woodtel.com/thumbnail.jpg','', 'initiateBrowsing','Browse and Shop for Products','Shop Now'));
+		var reply = new builder.Message(session)
+            .text('Our chat agent can help you in following activities')
+            .attachmentLayout(builder.AttachmentLayout.list)
+            .attachments(cards);
+        session.send(reply);
+		/*
 		var intent='';
 		LUISclient.predict(session.message.text, {
 
@@ -94,7 +104,7 @@ var bot = new builder.UniversalBot(connector, [
 			}
 		});
 		
-		
+		*/
         //session.beginDialog('conversationwithuser');
     },
 	
@@ -261,7 +271,7 @@ bot.dialog('conversationwithuser', [
 
 bot.dialog('SubsequentConversation', [
 
-	function (session, args, next) {
+	function (session, args) {
 		console.log('Conversation session, args, next');
         //session.send('Welcome to the IoT: \'%s\'', session.message.text);
 		builder.Prompts.text(session, 'Please Let us know how we can help you in IoT');
@@ -273,6 +283,135 @@ bot.dialog('SubsequentConversation', [
 		console.log('Conversation In session,results');
 
         var message = 'DUMMY Conversation SEARCH RESULT';
+        
+		builder.Prompts.text(session, message);
+        //session.send(message, destination);
+
+    }
+	
+]);
+
+bot.dialog('/initiateBrowsing', [
+	//function (session){
+	//	builder.Prompts.text(session, 'In Initate Message start');
+	//},
+
+	function (session, args) {
+		var cards = new Array();
+		cards.push(createThumbnailCard(session, "https://www.jcrew.com/s7-img-facade/2017nov_w_landing_wk0_lwl?$Mobile_546px_High$",'', 'listPopularWomenProduct','Buy Popular Women Product',"Browse and Shop"));
+		cards.push(createThumbnailCard(session, 'https://www.jcrew.com/s7-img-facade/m_cheat_nov17rc?$Mobile_546px_High$','', 'listPopularMenProduct','Buy Popular Men Product',"Browse and Shop"));
+		cards.push(createThumbnailCard(session, 'https://www.jcrew.com/s7-img-facade/b_cozy_nov17rc?$Mobile_546px_High$','', 'listPopularBoysProduct','Buy Popular Boys Product',"Browse and Shop"));
+		
+		var reply = new builder.Message(session)
+            .text('Shop from our popular categories')
+            .attachmentLayout(builder.AttachmentLayout.carousel)
+            .attachments(cards);
+        session.send(reply);
+       
+    },
+    function (session, results) {
+        var destination = results.response;
+		console.log('Conversation In session,results');
+
+        var message = 'DUMMY Conversation SEARCH RESULT --'+destination;
+        
+		builder.Prompts.text(session, message);
+        //session.send(message, destination);
+
+    }
+	
+]);
+bot.dialog('/customerService', [
+	//function (session){
+	//	builder.Prompts.text(session, 'In Initate Message start');
+	//},
+
+	function (session, args) {
+		console.log('Conversation session, args, next');
+        //session.send('Welcome to the IoT: \'%s\'', session.message.text);
+		builder.Prompts.text(session, 'Welcome to customer Service');
+        // try extracting entities
+       
+    },
+    function (session, results) {
+        var destination = results.response;
+		console.log('Conversation In session,results');
+
+        var message = 'Customer service results';
+        
+		builder.Prompts.text(session, message);
+        //session.send(message, destination);
+
+    }
+	
+]);
+
+
+bot.dialog('/listPopularWomenProduct', [
+	//function (session){
+	//	builder.Prompts.text(session, 'In Initate Message start');
+	//},
+
+	function (session, args) {
+		console.log('Conversation session, args, next');
+        //session.send('Welcome to the IoT: \'%s\'', session.message.text);
+		builder.Prompts.text(session, 'Welcome to Women products');
+        // try extracting entities
+       
+    },
+    function (session, results) {
+        var destination = results.response;
+		console.log('Conversation In session,results');
+
+        var message = 'Customer service results';
+        
+		builder.Prompts.text(session, message);
+        //session.send(message, destination);
+
+    }
+	
+]);
+bot.dialog('/listPopularMenProduct', [
+	//function (session){
+	//	builder.Prompts.text(session, 'In Initate Message start');
+	//},
+
+	function (session, args) {
+		console.log('Conversation session, args, next');
+        //session.send('Welcome to the IoT: \'%s\'', session.message.text);
+		builder.Prompts.text(session, 'Welcome to Mens Product');
+        // try extracting entities
+       
+    },
+    function (session, results) {
+        var destination = results.response;
+		console.log('Conversation In session,results');
+
+        var message = 'Customer service results';
+        
+		builder.Prompts.text(session, message);
+        //session.send(message, destination);
+
+    }
+	
+]);
+bot.dialog('/listPopularBoysProduct', [
+	//function (session){
+	//	builder.Prompts.text(session, 'In Initate Message start');
+	//},
+
+	function (session, args) {
+		console.log('Conversation session, args, next');
+        //session.send('Welcome to the IoT: \'%s\'', session.message.text);
+		builder.Prompts.text(session, 'Welcome to Boys Product');
+        // try extracting entities
+       
+    },
+    function (session, results) {
+        var destination = results.response;
+		console.log('Conversation In session,results');
+
+        var message = 'Customer service results';
         
 		builder.Prompts.text(session, message);
         //session.send(message, destination);
@@ -312,7 +451,7 @@ var printOnSuccess = function (response) {
 function getTextForIntent(intentvalue){
 	var chatreplytext='';
 	if(intentvalue == 'Introduction'){
-		chatreplytext='Welcome to Techolution. We are visionary IT consulting firm specializing in IoT and Analytics. We would be happy to help you.';
+		chatreplytext='We can help you in Following tasks 1. Customer service 2.Purchase 3.Product Recommendation';
 	}else if(intentvalue == 'assessmentdecision'){
 		chatreplytext='Please complete the Assement in http://techolution.com/iotAssessment to evalaute your current IoT maturity.';
 	}
@@ -344,6 +483,28 @@ function getTextForIntent(intentvalue){
 	}
 	return chatreplytext;
 }
+
+
+
+function createThumbnailCard(session,url,textMsg,actionName,titleText,buttonText) {
+	
+    return new builder.ThumbnailCard(session)
+        .title(titleText)
+        .subtitle('Shop Now')
+        .text(textMsg)
+		.images([
+            builder.CardImage.create(session, url)
+        ])
+        .buttons([
+            builder.CardAction.dialogAction(session,actionName,"",buttonText)
+        ]);
+}
+bot.beginDialogAction('initiateBrowsing', '/initiateBrowsing'); 
+bot.beginDialogAction('customerService', '/customerService'); 
+bot.beginDialogAction('listPopularWomenProduct', '/listPopularWomenProduct'); 
+bot.beginDialogAction('listPopularMenProduct', '/listPopularMenProduct'); 
+bot.beginDialogAction('listPopularBoysProduct', '/listPopularBoysProduct'); 
+
 /*
 function(response){
 	

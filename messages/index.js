@@ -311,7 +311,14 @@ bot.dialog('generalConversation', [
   					session.say(messageToSend);
             session.beginDialog('lateDelivery');
 
-          }else{
+          }else if (intent == 'ReturnReason_NotRequiredAlreadyObtained') {
+          //  var messageToSend=getTextForIntent(intent);
+          //  console.log('Message received is is:. %s',messageToSend);
+  				//	session.say(messageToSend);
+            session.beginDialog('productNotRequired');
+
+          }
+          {
 
           }
 
@@ -644,13 +651,20 @@ bot.dialog('lateDelivery', [
     var optionByUser=session.message.text;
     if(optionByUser.toUpperCase() == 'YES'  ){
       session.say("Your order cancellation request has been initiated. You would receive refund in 2 working days");
-      builder.Prompts.text(session,"Would you like to give feedback or would like us to help in any ways");
+      builder.Prompts.text(session,"Would you like to give feedback or would like us to help you in any ways");
     }else{
         session.say("Thanks for not cancelling the order");
-        builder.Prompts.text(session,"Would you like to give feedback or would like us to help in any ways");
+        builder.Prompts.text(session,"Would you like to give feedback or would like us to help you in any ways");
     }
 
 	}
+]);
+
+bot.dialog('productNotRequired', [
+    function (session) {
+      session.say("We understand that you have made a decision to go with a different provider for the product");
+      builder.Prompts.text(session,"Would you like to give feedback or would like us to help you in any ways");
+    }
 ]);
 
 

@@ -618,7 +618,7 @@ bot.dialog('lateDelivery', [
     console.log("chosen result is %s",results.response.text);
     console.log("chosen result by user  is %s",session.message.text);
     var optionByUser=session.message.text;
-    if(optionByUser == 'Yes'){
+    if(optionByUser.toUpperCase() == 'YES'){
         session.say("We are sorry that Next day delivery does not meet your requirement.We are working on providing same day delivery capability");
         builder.Prompts.choice(session, "Would you like to check if the product is available in our store in a near by area", "Yes|No", { listStyle: builder.ListStyle.button });
     }else{
@@ -632,7 +632,7 @@ bot.dialog('lateDelivery', [
 
     console.log("chosen result by user  is %s",session.message.text);
     var optionByUser=session.message.text;
-     if(optionByUser == 'Yes'){
+     if(optionByUser.toUpperCase() == 'YES'){
         session.say("Thanks for expressing interest to become our premier member. Please register by clicking on this link");
         builder.Prompts.confirm(session, "Would you still like to cancel your order?");
      }else{
@@ -642,7 +642,7 @@ bot.dialog('lateDelivery', [
 
 	},function (session, results) {
     var optionByUser=session.message.text;
-    if(optionByUser == 'Yes'){
+    if(optionByUser.toUpperCase() == 'YES'  ){
       session.say("Your order cancellation request has been initiated. You would receive refund in 2 working days");
       builder.Prompts.text(session,"Would you like to give feedback or would like us to help in any ways");
     }else{

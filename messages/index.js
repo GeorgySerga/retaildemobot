@@ -701,7 +701,7 @@ bot.dialog('optionForBOPS', [
     function (session, results) {
       var optionByUser=session.message.text;
       if(optionByUser.toUpperCase() == 'YES'  ){
-        builder.Prompts.confirm(session, "Amount would be adjusted accordingly. You do not require to pay anything nowShall we order on your behalf?");
+        builder.Prompts.confirm(session, "Amount would be adjusted accordingly. You do not require to pay anything now. Shall we order on your behalf?");
       }else{
           session.beginDialog('optionForBOPSNoOrder');
           session.endDialogWithResult();

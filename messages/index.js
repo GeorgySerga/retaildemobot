@@ -98,7 +98,10 @@ var bot = new builder.UniversalBot(connector, [
           }
 					else if (intent == 'ReturnAndCancellation'){
 						session.beginDialog('handleOrderCancellation');
-					}else{
+					}else if (intent == 'OrderStatus'){
+            session.beginDialog('handleProductStatus');
+          }
+          else{
 						var cards = new Array();
 						cards.push(createThumbnailCard(session, "images/customerservice.jpg",'', 'customerService','Customer Service- Refund, Cancel, Order Status Inquiry','Initiate Service Request'));
 						cards.push(createThumbnailCard(session, 'http://www.woodtel.com/thumbnail.jpg','', 'initiateBrowsing','Browse and Shop for Products','Shop Now'));
@@ -149,6 +152,9 @@ var bot = new builder.UniversalBot(connector, [
           else{
 						var messageToSend=getTextForIntent(intent);
 						session.send(messageToSend);
+            if(intent == 'ClosingNotes_Happy'){
+              session.endConversation();
+            }
 					}
 			},
 
@@ -352,9 +358,9 @@ bot.dialog('generalConversation', [
 	},
 
     function (session, results) {
-		console.log('Session state in two is %s',session.sessionState.callstack.state);
-		console.log('Session Reset in two is %s',session.isReset());
-		console.log('tesxt to search is %s',results.response);
+		console.log('General conversation Session state in two is %s',session.sessionState.callstack.state);
+		console.log('General conversation Session Reset in two is %s',session.isReset());
+		console.log('General conversation tesxt to search is %s',results.response);
         //session.dialogData.reservationDate = builder.EntityRecognizer.resolveTime([results.response]);
     if(results.response){
       var intent='';
@@ -422,7 +428,7 @@ bot.dialog('SubsequentConversation', [
 
 ]);
 
-bot.dialog('/initiateBrowsing', [
+ bot.dialog('/initiateBrowsing', [
 	//function (session){
 	//	builder.Prompts.text(session, 'In Initate Message start');
 	//},
@@ -695,7 +701,7 @@ bot.dialog('optionForBOPS', [
     function (session, results) {
       var optionByUser=session.message.text;
       if(optionByUser.toUpperCase() == 'YES'  ){
-        builder.Prompts.confirm(session, "Shall we order on your behalf?Amount would be adjusted accordingly. You do not require to pay anything now");
+        builder.Prompts.confirm(session, "Amount would be adjusted accordingly. You do not require to pay anything nowShall we order on your behalf?");
       }else{
           session.beginDialog('optionForBOPSNoOrder');
           session.endDialogWithResult();
@@ -756,6 +762,163 @@ bot.dialog('productNotRequired', [
 ]);
 
 
+bot.dialog('handleProductStatus', [
+    function (session) {
+       // session.send('Welcome to the Hotels finder! We are analyzing your message: \'%s\'', session.message.text);
+
+        // try extracting entities
+		builder.Prompts.text(session, 'Please enter your order number');
+
+    },
+    function (session, results) {
+		//TODO Order number validation
+    var orderNumber= results.response;
+    session.conversationData.orderNUmber=orderNumber;
+		builder.Prompts.text(session, 'Thanks for providing the order number. In order to ensure authenticity, we have emailed a OTP send an OTP to the e-mail Id of the order and also the telephone number. Please enter the number to proceed further');
+
+    },
+ 	function (session, results) {
+		//TODO Get  status of Order in random from a list of order status and display a message accordingly
+		//builder.Prompts.text('Thanks for confirming the order. Since the order is yet to be shipped, we will refund the money in next two working days');
+		session.say('Thanks for confirming your identity.');
+    var balance=session.conversationData.orderNUmber%4;
+    if(balance == 0){
+      session.send("Your order will be shipped today evening. You will be receiving it in 2 days");
+      session.beginDialog('onTimeDelivery');
+    }else if (balance == 1){
+        session.beginDialog('getPreferredTiming');
+    }else if (balance == 2){
+      session.send("Your order will be shipped as two packages. First package will arrive tomorrow. Next package will arrive in 3 days");
+      session.beginDialog('onTimeDelivery');
+    }else{
+      session.beginDialog('handleDelayDelivery');
+    }
+
+	}
+]).triggerAction({
+    matches: 'Order Status',
+    onInterrupted: function (session) {
+        session.send('Starting Order Cancellation');
+    }
+});
+
+bot.dialog('getPreferredTiming', [
+    function (session) {
+      session.send("Your order will be delivered tomorrow.");
+      builder.Prompts.text(session, 'Please let us know if you have any preffered time to deliver');
+
+    },
+    function (session, results) {
+		//TODO Order number validation
+    var orderNumber= results.response;
+
+		builder.Prompts.text(session, 'Customer satisfaction is our top priority. We are striving hard to delight our customers. Product will be delivered at the requested time.');
+
+    }
+
+]);
+
+bot.dialog('handleDelayDelivery', [
+    function (session) {
+       		builder.Prompts.text(session, 'We are sorry. Your package was supposed to be delivered today. Due to unavoidable circumstances, it will be delayed a day later');
+
+    },
+    function (session, results) {
+        var messageEnteredByUser=results.response;
+
+        if(results.response){
+          var intent='';
+          LUISclient.predict(results.response, {
+
+              //On success of prediction
+                onSuccess: function (response) {
+                var intent = response.topScoringIntent.intent;
+                var intentsSize=response.intents.length;
+                console.log('Intents length is %s',intentsSize);
+                console.log('intent received is %s',response.topScoringIntent.intent);
+                //printOnSuccess(response);
+                console.log('Intent is:. %s',intent);
+                var messageToSend=getTextForIntent(intent);
+                builder.Prompts.text(session,messageToSend);
+                //session.beginDialog("generalConversation");
+              },
+
+            //On failure of prediction
+               onFailure: function (err) {
+                console.error(err);
+              }
+            });
+          }
+    },
+    function (session, results) {
+        var messageEnteredByUser=results.response;
+        console.log('In final step of delay delivery, message entered is: %s',messageEnteredByUser);
+        if(results.response){
+          var intent='';
+          LUISclient.predict(results.response, {
+
+              //On success of prediction
+                onSuccess: function (response) {
+                var intent = response.topScoringIntent.intent;
+                var intentsSize=response.intents.length;
+                console.log('Intents length is %s',intentsSize);
+                console.log('intent received is %s',response.topScoringIntent.intent);
+                //printOnSuccess(response);
+                console.log('Intent is:. %s',intent);
+                //var messageToSend=getTextForIntent(intent);
+                if (intent == 'ShowingSignsOfLeaving'){
+                  session.beginDialog("handleSignsOfLeaving");
+                }else if(intent == 'Escalation'){
+                  builder.Prompts.text(session,"Customer satisfaction is our top priority. We are striving hard to delight our customers.If you are un happy with the responses please contact call centre at 1-800-123-4567");
+                }else {
+                  session.beginDialog("NotAngryDuetoDelay");
+                }
+                //session.send(messageToSend);
+
+              },
+
+            //On failure of prediction
+               onFailure: function (err) {
+                console.error(err);
+              }
+            });
+          }
+
+    }
+
+]);
+
+bot.dialog('onTimeDelivery', [
+    function (session) {
+       builder.Prompts.text(session,"Please provide your feedback or how would like us to help you in any ways");
+    }
+]);
+
+bot.dialog('handleSignsOfLeaving', [
+    function (session) {
+       builder.Prompts.confirm(session, "Customer satisfaction is our top priority. We are striving hard to delight our customers. We would like to offer one year free premium membership. Would you like to avail it?");
+    },
+    function (session,results) {
+       var decision=results.response;
+       if(session.message.text == 'YES'){
+         builder.Prompts.text(session, "Thanks for availing the offer. Please provide your feedback or how would like us to help you in any ways");
+       }else{
+         builder.Prompts.text(session, "We would be at your service 24/7. Please provide your feedback or how would like us to help you in any ways");
+       }
+
+    }
+]);
+
+bot.dialog('NotAngryDuetoDelay', [
+    function (session) {
+        session.send("Customer satisfaction is our top priority. We are striving hard. We would like to offer $50 voucher. You would receive e-mail with details soon");
+        builder.Prompts.text(session,"Please provide your feedback or how would like us to help you in any ways");
+    }
+]);
+
+
+
+
 if (useEmulator) {
     var restify = require('restify');
     var server = restify.createServer();
@@ -791,6 +954,14 @@ function getTextForIntent(intentvalue){
 		chatreplytext='Following offers are currently available 1. 10% off on all purchases above $200. 2. Free next day delivery on all orders above $100 3.Free shipping on all orders above $75';
 	}else if (intentvalue == 'ReturnReason_LateDeliveryTime'){
     chatreplytext = 'We are sorry that we take longer than your expected time';
+  }else if(intentvalue == 'Delay_Angry'){
+    chatreplytext = 'We understand your agony. But due to incliment weather, our deliveries are getting delayed.';
+  }else if(intentvalue == 'ShowingSignsOfLeaving'){
+    chatreplytext = 'Customer satisfaction is our top priority. We are striving hard. We would like to offer one year free premium membership';
+  }else if(intentvalue == 'NotAngryDuetoDelay'){
+    chatreplytext = 'Customer satisfaction is our top priority. We are striving hard. We would like to offer $50 voucher';
+  }else if(intentvalue == 'ClosingNotes_Happy'){
+    chatreplytext = 'I am glad that I was able to help you. Thank you';
   }else{
 		chatreplytext='Please contact our customer support at 1-800-562-0258 to help you further.';
 	}
@@ -834,6 +1005,9 @@ function getDialogForIntent(intentVal){
   }
   if (intentVal == 'ReturnAndCancellation'){
     chosendialog='handleOrderCancellation';
+  }
+  if(intentVal == 'OrderStatus'){
+    chosendialog='handleProductStatus';
   }
   return chosendialog;
 }

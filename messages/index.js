@@ -297,6 +297,9 @@ bot.dialog('generalConversation', [
           var dialogToInitiate=getDialogForIntent(intent);
           if(dialogToInitiate != 'NA'){
             session.beginDialog(dialogToInitiate);
+          }else{
+            var messageToSend=getTextForIntent(intent);
+            session.say(messageToSend);
           }
         /*  if(intent == 'ReturnReason_LateDeliveryTime'){
             var messageToSend=getTextForIntent(intent);
@@ -309,9 +312,9 @@ bot.dialog('generalConversation', [
   				//	session.say(messageToSend);
             session.beginDialog('productNotRequired');
           }*/
-          {
+        /*  {
 
-          }
+        }*/
 
 					//printOnSuccess(response);
 
@@ -345,9 +348,15 @@ bot.dialog('generalConversation', [
   					console.log('intent received is %s',response.topScoringIntent.intent);
   					//printOnSuccess(response);
   					console.log('Intent is:. %s',intent);
-
-  					var messageToSend=getTextForIntent(intent);
-  					session.send(messageToSend);
+            var dialogToInitiate=getDialogForIntent(intent);
+            if(dialogToInitiate != 'NA'){
+              session.beginDialog(dialogToInitiate);
+            }else{
+              var messageToSend=getTextForIntent(intent);
+              session.say(messageToSend);
+            }
+  					/*var messageToSend=getTextForIntent(intent);
+  					session.send(messageToSend);*/
             //session.beginDialog("generalConversation");
 
   			},
@@ -566,7 +575,7 @@ bot.dialog('/addToCart', [
 		//builder.Prompts.text(session, message);
         //session.send(message, destination);
 		session.beginDialog('generalConversation');
-
+session.say(messageToSend);
     }
 
 ]);

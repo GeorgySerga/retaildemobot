@@ -759,14 +759,19 @@ bot.dialog('handleProductStatus', [
 		builder.Prompts.text(session, 'Please enter your order number');
 
     },
-    function (session, results) {
+  /*  function (session, results) {
 		//TODO Order number validation
     var orderNumber= results.response;
     session.conversationData.orderNUmber=orderNumber;
 		//builder.Prompts.text(session, 'Thanks for providing the order number. In order to ensure authenticity, we have emailed a OTP send an OTP to the e-mail Id of the order and also the telephone number. Please enter the number to proceed further');
     session.send('Thanks for providing the order number.');
-  },
+  },*/
  	function (session, results) {
+
+    var orderNumber= results.response;
+    session.conversationData.orderNUmber=orderNumber;
+		//builder.Prompts.text(session, 'Thanks for providing the order number. In order to ensure authenticity, we have emailed a OTP send an OTP to the e-mail Id of the order and also the telephone number. Please enter the number to proceed further');
+    session.send('Thanks for providing the order number.');
 		//TODO Get  status of Order in random from a list of order status and display a message accordingly
 		//builder.Prompts.text('Thanks for confirming the order. Since the order is yet to be shipped, we will refund the money in next two working days');
 		//session.say('Thanks for confirming your identity.');
@@ -801,7 +806,7 @@ bot.dialog('getPreferredTiming', [
 		//TODO Order number validation
     var orderNumber= results.response;
 
-		builder.Prompts.text(session, 'Customer satisfaction is our top priority. We are striving hard to delight our customers. Product will be delivered at the requested time.');
+		builder.Prompts.text(session, 'Customer satisfaction is our top priority. We are striving hard to delight our customers. Product will be delivered at the requested time. Please let us know how we could help you further.');
 
     }
 

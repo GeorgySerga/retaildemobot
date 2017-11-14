@@ -1,17 +1,11 @@
 /*
  Copyright (c) Microsoft. All rights reserved.
  Licensed under the MIT license.
-
  Microsoft Cognitive Services (formerly Project Oxford): https://www.microsoft.com/cognitive-services
-
-
  Microsoft Cognitive Services (formerly Project Oxford) GitHub:
  https://github.com/Microsoft/ProjectOxford-ClientSDK
-
-
  Copyright (c) Microsoft Corporation
  All rights reserved.
-
  MIT License:
  Permission is hereby granted, free of charge, to any person obtaining
  a copy of this software and associated documentation files (the
@@ -20,10 +14,8 @@
  distribute, sublicense, and/or sell copies of the Software, and to
  permit persons to whom the Software is furnished to do so, subject to
  the following conditions:
-
  The above copyright notice and this permission notice shall be
  included in all copies or substantial portions of the Software.
-
  THE SOFTWARE IS PROVIDED ""AS IS"", WITHOUT WARRANTY OF ANY KIND,
  EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
  MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
@@ -205,12 +197,10 @@ bot.recognizer(recognizer);
 
 /*
 LUISclient.predict("Assessment", {
-
   //On success of prediction
   onSuccess: function (response) {
     printOnSuccess(response);
   },
-
   //On failure of prediction
   onFailure: function (err) {
     console.error(err);
@@ -219,7 +209,6 @@ LUISclient.predict("Assessment", {
 */
 /*
 bot.dialog('/', [
-
 	function (session, args, next) {
 		console.log('session, args, next');
         session.send('Welcome to the IoT: \'%s\'', session.message.text);
@@ -227,22 +216,15 @@ bot.dialog('/', [
 		var offeringEntity = builder.EntityRecognizer.findEntity('Offerings');
 		next({ response: offeringEntity.entity });
         // try extracting entities
-
     },
     function (session, results) {
         var destination = results.response;
 		console.log('In session,results');
-
         var message = 'DUMMY SEARCH RESULT';
-
 		//builder.Prompts.text(session, message);
         session.send(message, destination);
 		session.endDialog();
-
-
     },
-
-
 ]).triggerAction({
     matches: 'Conversation',
     onInterrupted: function (session) {
@@ -250,19 +232,15 @@ bot.dialog('/', [
         session.send('DONT KNOW WHAT TO DO.SORRY');
     }
 });
-
 */
 /*
 bot.dialog('/', [
-
 	function (session, args, next) {
 		console.log('session, args, next');
         session.send('Welcome to the Techolution ');
 		builder.Prompts.text(session, 'Please Let us know how we can help you in IoT');
 		session.beginDialog('conversation');
-
     }
-
 ]);
 */
 
@@ -282,17 +260,14 @@ bot.dialog('conversationwithuser', [
         //session.send('Welcome to the IoT: \'%s\'', session.message.text);
 		builder.Prompts.text(session, 'Please Let us know how we can help you in IoT');
         // try extracting entities
-
     },
     function (session, results) {
         var destination = results.response;
 		console.log('Conversation In session,results');
 		session.send('result is:\'%s\'',results.response);
         var message = 'DUMMY Conversation SEARCH RESULT';
-
 		builder.Prompts.text(session, message);
         //session.send(message, destination);
-
     }*/
 
 ]);
@@ -328,13 +303,11 @@ bot.dialog('generalConversation', [
             console.log('Message received is is:. %s',messageToSend);
   					session.say(messageToSend);
             session.beginDialog('lateDelivery');
-
           }else if (intent == 'ReturnReason_NotRequiredAlreadyObtained') {
           //  var messageToSend=getTextForIntent(intent);
           //  console.log('Message received is is:. %s',messageToSend);
   				//	session.say(messageToSend);
             session.beginDialog('productNotRequired');
-
           }*/
           {
 
@@ -609,7 +582,6 @@ bot.dialog('handleOrderCancellation', [
   /*  function (session, results) {
 		//TODO Order number validation
 		builder.Prompts.text(session, 'Thanks for providing the order number. In order to ensure authenticity, we have emailed a OTP send an OTP to the e-mail Id of the order and also the telephone number. Please enter the number to proceed further');
-
   },*/
 	function (session, results) {
 		//TODO Get  status of Order in random from a list of order status and display a message accordingly
@@ -702,21 +674,26 @@ bot.dialog('optionForBOPS', [
     function (session, results) {
       var optionByUser=session.message.text;
       if(optionByUser.toUpperCase() == 'YES'  ){
+        session.conversationData.storepickup='YES'
         builder.Prompts.confirm(session, "Amount would be adjusted accordingly. You do not require to pay anything now. Shall we order on your behalf?");
       }else{
+          session.conversationData.storepickup='NO'
           session.beginDialog('optionForBOPSNoOrder');
-          session.endDialogWithResult();
+        //  session.endDialogWithResult();
       }
     },
     function (session, results) {
         var optionByUser=session.message.text;
+        var previousselection=session.conversationData.storepickup;
         if(optionByUser.toUpperCase() == 'YES'  ){
           session.say("Thanks for choosing to order from store. You will receive e-mail wih order details.");
           builder.Prompts.text(session,"Please provide your feedback as it would help us to serve you better");
         //  session.endDialog();
-        }else{
+      }else if (previousselection != 'NO'){
           session.say('Unfortunately, due to regulations we cannot ship from store.');
           builder.Prompts.confirm(session, "Would you Still like to cancel your order?");
+        }else{
+          session.endDialog();
         }
     },
     function (session, results) {
@@ -739,11 +716,13 @@ bot.dialog('optionForBOPS', [
 bot.dialog('optionForBOPSNoOrder', [
     function (session) {
       session.say('Unfortunately, due to regulations we cannot ship from store.');
-      builder.Prompts.confirm(session, "Would you Still like to cancel your order?");
+      builder.Prompts.choice(session, "Would you Still like to cancel your order?", "Yes.Cancel my order|No", { listStyle: builder.ListStyle.button });
+      //NOT WAITIng for RESULTS SO REPLACING IT WITH CHOICE
+      //builder.Prompts.confirm(session, "Would you Still like to cancel your order?");
     },
     function (session, results) {
       var optionByUser=session.message.text;
-      if(optionByUser.toUpperCase() == 'YES'  ){
+      if(optionByUser == 'Yes.Cancel my order'  ){
         session.say("Your order cancellation request has been initiated. You would receive refund in 2 working days");
         builder.Prompts.text(session,"Would you like to give feedback or would like us to help you in any ways");
         //session.endDialogWithResult();
@@ -771,13 +750,13 @@ bot.dialog('handleProductStatus', [
 		builder.Prompts.text(session, 'Please enter your order number');
 
     },
-    /*function (session, results) {
+    function (session, results) {
 		//TODO Order number validation
     var orderNumber= results.response;
     session.conversationData.orderNUmber=orderNumber;
-		builder.Prompts.text(session, 'Thanks for providing the order number. In order to ensure authenticity, we have emailed a OTP send an OTP to the e-mail Id of the order and also the telephone number. Please enter the number to proceed further');
-
-  },*/
+		//builder.Prompts.text(session, 'Thanks for providing the order number. In order to ensure authenticity, we have emailed a OTP send an OTP to the e-mail Id of the order and also the telephone number. Please enter the number to proceed further');
+    session.send('Thanks for providing the order number.');
+  },
  	function (session, results) {
 		//TODO Get  status of Order in random from a list of order status and display a message accordingly
 		//builder.Prompts.text('Thanks for confirming the order. Since the order is yet to be shipped, we will refund the money in next two working days');
@@ -1056,6 +1035,5 @@ bot.beginDialogAction('addToCart', '/addToCart');
 
 /*
 function(response){
-
 	var intentlength=response.entities.length;
 }*/

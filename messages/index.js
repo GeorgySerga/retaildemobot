@@ -106,9 +106,9 @@ var bot = new builder.UniversalBot(connector, [
 						cards.push(createThumbnailCard(session, "images/customerservice.jpg",'', 'customerService','Customer Service- Refund, Cancel, Order Status Inquiry','Initiate Service Request'));
 						cards.push(createThumbnailCard(session, 'http://www.woodtel.com/thumbnail.jpg','', 'initiateBrowsing','Browse and Shop for Products','Shop Now'));
 						var reply = new builder.Message(session)
-						.text('Our chat agent can help you in following activities. Or type your questions or how we can help you')
-						.attachmentLayout(builder.AttachmentLayout.list)
-						.attachments(cards);
+						.text('Type your questions and we will help you')
+					//	.attachmentLayout(builder.AttachmentLayout.list)
+					//	.attachments(cards);
 						session.send(reply);
 					}
 
@@ -606,15 +606,16 @@ bot.dialog('handleOrderCancellation', [
 		builder.Prompts.text(session, 'Please enter the order number which you would like to cancel');
 
     },
-    function (session, results) {
+  /*  function (session, results) {
 		//TODO Order number validation
 		builder.Prompts.text(session, 'Thanks for providing the order number. In order to ensure authenticity, we have emailed a OTP send an OTP to the e-mail Id of the order and also the telephone number. Please enter the number to proceed further');
 
-    },
+  },*/
 	function (session, results) {
 		//TODO Get  status of Order in random from a list of order status and display a message accordingly
 		//builder.Prompts.text('Thanks for confirming the order. Since the order is yet to be shipped, we will refund the money in next two working days');
-		session.say('Thanks for confirming the order. Since the order is yet to be shipped, we will refund the money in next two working days');
+		//session.say('Thanks for confirming the order. Since the order is yet to be shipped, we will refund the money in next two working days');
+    session.say('Thanks for providing the order number. Since the order is yet to be shipped, we will refund the money in next two working days');
   //  session.beginDialog('generalConversation');
     builder.Prompts.text(session, ' Could you please let us know the reason for the order cancellation');
 
@@ -770,17 +771,17 @@ bot.dialog('handleProductStatus', [
 		builder.Prompts.text(session, 'Please enter your order number');
 
     },
-    function (session, results) {
+    /*function (session, results) {
 		//TODO Order number validation
     var orderNumber= results.response;
     session.conversationData.orderNUmber=orderNumber;
 		builder.Prompts.text(session, 'Thanks for providing the order number. In order to ensure authenticity, we have emailed a OTP send an OTP to the e-mail Id of the order and also the telephone number. Please enter the number to proceed further');
 
-    },
+  },*/
  	function (session, results) {
 		//TODO Get  status of Order in random from a list of order status and display a message accordingly
 		//builder.Prompts.text('Thanks for confirming the order. Since the order is yet to be shipped, we will refund the money in next two working days');
-		session.say('Thanks for confirming your identity.');
+		//session.say('Thanks for confirming your identity.');
     var balance=session.conversationData.orderNUmber%4;
     if(balance == 0){
       session.send("Your order will be shipped today evening. You will be receiving it in 2 days");
@@ -955,7 +956,7 @@ function getTextForIntent(intentvalue){
 	}else if (intentvalue == 'ReturnReason_LateDeliveryTime'){
     chatreplytext = 'We are sorry that we take longer than your expected time';
   }else if(intentvalue == 'Delay_Angry'){
-    chatreplytext = 'We understand your agony. But due to incliment weather, our deliveries are getting delayed.';
+    chatreplytext = 'We understand your Anxiety. But due to incliment weather, our deliveries are getting delayed.';
   }else if(intentvalue == 'ShowingSignsOfLeaving'){
     chatreplytext = 'Customer satisfaction is our top priority. We are striving hard. We would like to offer one year free premium membership';
   }else if(intentvalue == 'NotAngryDuetoDelay'){

@@ -943,7 +943,7 @@ var printOnSuccess = function (response) {
 function getTextForIntent(intentvalue){
 	var chatreplytext='';
 	if(intentvalue == 'Introduction'){
-		chatreplytext='We can help you in Following tasks 1. Customer service 2.Purchase 3.Product Recommendation';
+		chatreplytext='Type your questions and we will help you';
 	}else if(intentvalue == 'offers'){
 		chatreplytext='Following offers are currently available 1. 10% off on all purchases above $200. 2. Free next day delivery on all orders above $100 3.Free shipping on all orders above $75';
 	}else if (intentvalue == 'ReturnReason_LateDeliveryTime'){

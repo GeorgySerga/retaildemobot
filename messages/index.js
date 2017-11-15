@@ -799,7 +799,7 @@ bot.dialog('handleProductStatus', [
 bot.dialog('getPreferredTiming', [
     function (session) {
       session.send("Your order will be delivered tomorrow.");
-      builder.Prompts.text(session, 'Please let us know if you have any preffered time to deliver');
+      builder.Prompts.text(session, 'Please let us know if you have any preferred time to deliver');
 
     },
     function (session, results) {

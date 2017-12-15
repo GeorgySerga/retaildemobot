@@ -1089,7 +1089,7 @@ bot.dialog('handleOrderCancellationSimplified', [
                 //printOnSuccess(response);
                 console.log('Intent is:. %s',intent);
                 //var messageToSend=getTextForIntent(intent);
-                if (intent == 'ShowingSignsOfLeaving' || intent == 'Escalation' ){ 
+                if (intent == 'ShowingSignsOfLeaving' || intent == 'Escalation' || intent == 'Delay_Angry' ){ 
                   session.beginDialog("handleEscalationOption");
                 }else {
                   session.send('As a preferred customer, we would like to offer you $50 discount coupon.');

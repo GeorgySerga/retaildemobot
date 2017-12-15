@@ -58,7 +58,18 @@ var LUISclient = LUISClient({
 
 
 var bot = new builder.UniversalBot(connector, [
-    function (session) {
+
+		function (session) {
+			var hours = (new Date()).getUTCHours()-5;
+			if (hours <12){
+				builder.Prompts.text(session, 'Good morning. Please let us know how we can help you.');
+			}else if(hours <18){
+				builder.Prompts.text(session, 'Good Afternoon. Please let us know how we can help you.');
+			}else{
+				builder.Prompts.text(session, 'Good Evening. Please let us know how we can help you.');
+			}
+		},
+    function (session,results) {
 		console.log('Starting message new is %s',session.message.text);
 		console.log('Session state in new  one is %s',session.sessionState.callstack.state);
 		console.log('Session Reset in new one is %s',session.isReset());
@@ -89,7 +100,8 @@ var bot = new builder.UniversalBot(connector, [
             session.send(getTextForIntent("offers"));
           }
 					else if (intent == 'ReturnAndCancellation'){
-						session.beginDialog('handleOrderCancellation');
+						//session.beginDialog('handleOrderCancellationSimplified');
+						session.beginDialog('handleOrderCancellationSimplified');
 					}else if (intent == 'OrderStatus'){
             session.beginDialog('handleProductStatus');
           }
@@ -136,10 +148,10 @@ var bot = new builder.UniversalBot(connector, [
 					console.log('Intent is:. %s',intent);
           var dialogForIntent=getDialogForIntent(intent);
           if(dialogForIntent != 'NA'){
-            session.beginDialog('handleOrderCancellation');
+            session.beginDialog('handleOrderCancellationSimplified');
           }
 					/*if (intent == 'ReturnAndCancellation'){
-						session.beginDialog('handleOrderCancellation');
+						session.beginDialog('handleOrderCancellationSimplified');
 					}*/
           else{
 						var messageToSend=getTextForIntent(intent);
@@ -169,7 +181,125 @@ var bot = new builder.UniversalBot(connector, [
 ]);
 
 
+bot.dialog('generalConversationNew', [
 
+
+	function (session) {
+			builder.Prompts.text(session, 'Please let us know how we can help you.');	
+			
+		},
+    function (session,results) {
+		console.log('Starting message new is %s',session.message.text);
+		console.log('Session state in new  one is %s',session.sessionState.callstack.state);
+		console.log('Session Reset in new one is %s',session.isReset());
+		console.log('Session messageSent new in one is %s',session.messageSent());
+		console.log('tesxt to search is %s',session.message.text);
+		/*
+		var cards = new Array();
+		cards.push(createThumbnailCard(session, "images/customerservice.jpg",'', 'customerService','Customer Service- Refund, Cancel, Order Status Inquiry','Initiate Service Request'));
+		cards.push(createThumbnailCard(session, 'http://www.woodtel.com/thumbnail.jpg','', 'initiateBrowsing','Browse and Shop for Products','Shop Now'));
+		var reply = new builder.Message(session)
+            .text('Our chat agent can help you in following activities.')
+            .attachmentLayout(builder.AttachmentLayout.list)
+            .attachments(cards);
+        session.send(reply);*/
+		//session.beginDialog('generalConversation');
+
+		var intent='';
+		LUISclient.predict(session.message.text, {
+
+				//On success of prediction
+					onSuccess: function (response) {
+					intent = response.topScoringIntent.intent;
+					console.log('intent received is %s',response.topScoringIntent.intent);
+					console.log('Intent is:. %s',intent);
+
+					console.log('Intent is:. %s',intent);
+          if(intent == 'offers'){
+            session.send(getTextForIntent("offers"));
+          }
+					else if (intent == 'ReturnAndCancellation'){
+						session.beginDialog('handleOrderCancellationSimplified');
+					}else if (intent == 'OrderStatus'){
+            session.beginDialog('handleProductStatus');
+          }
+          else{
+						var cards = new Array();
+						cards.push(createThumbnailCard(session, "images/customerservice.jpg",'', 'customerService','Customer Service- Refund, Cancel, Order Status Inquiry','Initiate Service Request'));
+						cards.push(createThumbnailCard(session, 'http://www.woodtel.com/thumbnail.jpg','', 'initiateBrowsing','Browse and Shop for Products','Shop Now'));
+						var reply = new builder.Message(session)
+						.text('Type your questions and we will help you')
+					//	.attachmentLayout(builder.AttachmentLayout.list)
+					//	.attachments(cards);
+						session.send(reply);
+					}
+
+					//printOnSuccess(response);
+
+			},
+
+			//On failure of prediction
+					onFailure: function (err) {
+					console.error(err);
+			}
+		});
+
+
+        //session.beginDialog('conversationwithuser');
+    },
+
+    function (session, results) {
+		console.log('Session state in two is %s',session.sessionState.callstack.state);
+		console.log('Session Reset in two is %s',session.isReset());
+		console.log('tesxt to search is %s',results.response);
+        //session.dialogData.reservationDate = builder.EntityRecognizer.resolveTime([results.response]);
+
+
+		var intent='';
+		LUISclient.predict(results.response, {
+
+				//On success of prediction
+					onSuccess: function (response) {
+					var intent = response.topScoringIntent.intent;
+					console.log('intent received is %s',response.topScoringIntent.intent);
+					//printOnSuccess(response);
+					console.log('Intent is:. %s',intent);
+          var dialogForIntent=getDialogForIntent(intent);
+          if(dialogForIntent != 'NA'){
+            session.beginDialog('handleOrderCancellationSimplified');
+          }
+					/*if (intent == 'ReturnAndCancellation'){
+						session.beginDialog('handleOrderCancellationSimplified');
+					}*/
+          else{
+						var messageToSend=getTextForIntent(intent);
+						session.send(messageToSend);
+            if(intent == 'ClosingNotes_Happy'){
+              session.endConversation();
+            }
+					}
+			},
+
+			//On failure of prediction
+					onFailure: function (err) {
+					console.error(err);
+			}
+		});
+		/*
+		console.log('Intent is:. %s',intent);
+		//session.routeToActiveDialog(results);
+		session.send('Intent is:. %s',intent);*/
+		//builder.Prompts.text(session, 'Intent is:. %s',intent);
+
+
+        //builder.Prompts.text(session, "How many people are in your party?");
+
+    }
+	
+	
+	
+	]);
+	
 
 
 
@@ -751,6 +881,56 @@ bot.dialog('productNotRequired', [
 ]);
 
 
+bot.dialog('handleProductStatusInvalid', [
+    
+  /*  function (session, results) {
+		//TODO Order number validation
+    var orderNumber= results.response;
+    session.conversationData.orderNUmber=orderNumber;
+		//builder.Prompts.text(session, 'Thanks for providing the order number. In order to ensure authenticity, we have emailed a OTP send an OTP to the e-mail Id of the order and also the telephone number. Please enter the number to proceed further');
+    session.send('Thanks for providing the order number.');
+  },*/
+  
+	function(session){
+		builder.Prompts.text(session,'Order number provided does not exist. Please enter a valid order number');
+	},
+ 	function (session,results) {
+		
+	
+
+	
+    var orderNumber= results.response;
+    session.conversationData.orderNUmber=orderNumber;
+		//builder.Prompts.text(session, 'Thanks for providing the order number. In order to ensure authenticity, we have emailed a OTP send an OTP to the e-mail Id of the order and also the telephone number. Please enter the number to proceed further');
+    session.send('Thanks for providing the order number.');
+		//TODO Get  status of Order in random from a list of order status and display a message accordingly
+		//builder.Prompts.text('Thanks for confirming the order. Since the order is yet to be shipped, we will refund the money in next two working days');
+		//session.say('Thanks for confirming your identity.');
+    console.log ('order number is %s' ,orderNumber);
+	if(orderNumber < 10000 || orderNumber >1000000){
+		//session.send('Please enter a valid order number');
+		//session.endDialog();
+		session.beginDialog('handleProductStatusInvalid');
+		//session.
+	}else{
+	//	session.endDialog();
+		session.beginDialog('handleProductStatusValid');
+	}
+    
+
+	}
+]).triggerAction({
+    matches: 'Order Status',
+    onInterrupted: function (session) {
+        session.send('Starting Order Cancellation');
+    }
+});
+
+
+
+
+
+
 bot.dialog('handleProductStatus', [
     function (session) {
        // session.send('Welcome to the Hotels finder! We are analyzing your message: \'%s\'', session.message.text);
@@ -776,6 +956,89 @@ bot.dialog('handleProductStatus', [
 		//builder.Prompts.text('Thanks for confirming the order. Since the order is yet to be shipped, we will refund the money in next two working days');
 		//session.say('Thanks for confirming your identity.');
     var balance=session.conversationData.orderNUmber%4;
+	if(orderNumber < 10000 || orderNumber >1000000){
+		//session.send('Please enter a valid order number');
+		//session.endDialog();
+		session.beginDialog('handleProductStatusInvalid');
+		//session.
+	}else{
+		session.beginDialog('handleProductStatusValid');
+	}
+   
+
+	}
+]).triggerAction({
+    matches: 'Order Status',
+    onInterrupted: function (session) {
+        session.send('Starting Order Cancellation');
+    }
+});
+
+bot.dialog('handleProductStatusValid', [
+    function (session) {
+       // session.send('Welcome to the Hotels finder! We are analyzing your message: \'%s\'', session.message.text);
+		var orderNumber=session.conversationData.orderNUmber;
+        // try extracting entities
+		session.send('Your order has been shipped. You will be receiving it in 3 days');
+		builder.Prompts.text(session, 'Please let us know how we may help with your order');
+
+    },
+  /*  function (session, results) {
+		//TODO Order number validation
+    var orderNumber= results.response;
+    session.conversationData.orderNUmber=orderNumber;
+		//builder.Prompts.text(session, 'Thanks for providing the order number. In order to ensure authenticity, we have emailed a OTP send an OTP to the e-mail Id of the order and also the telephone number. Please enter the number to proceed further');
+    session.send('Thanks for providing the order number.');
+  },*/
+  
+	function(session,results){
+		
+		var intent='';
+		LUISclient.predict(results.response, {
+			
+
+				//On success of prediction
+					onSuccess: function (response) {
+					var intent = response.topScoringIntent.intent;
+					console.log('intent received is %s',response.topScoringIntent.intent);
+					//printOnSuccess(response);
+					console.log('Intent is:. %s',intent);
+					
+					if(intent == 'ReturnAndCancellation'){
+						session.beginDialog('handleOrderCancellationSimplified');
+						
+					}
+					else if(intent == 'AddressChange')
+					{
+						session.beginDialog('handleAddressChange');
+					}
+					else{
+						session.send('Our apologize. Currently we support only order address change and order cancellation');
+						//session.endConversation();
+						session.beginDialog("generalConversationNew");
+					}
+          
+		},//On failure of prediction
+					onFailure: function (err) {
+					console.error(err);
+					}
+	});
+	},
+ 	/*function (session, results) {
+
+    var orderNumber= results.response;
+    session.conversationData.orderNUmber=orderNumber;
+		//builder.Prompts.text(session, 'Thanks for providing the order number. In order to ensure authenticity, we have emailed a OTP send an OTP to the e-mail Id of the order and also the telephone number. Please enter the number to proceed further');
+    session.send('Thanks for providing the order number.');
+		//TODO Get  status of Order in random from a list of order status and display a message accordingly
+		//builder.Prompts.text('Thanks for confirming the order. Since the order is yet to be shipped, we will refund the money in next two working days');
+		//session.say('Thanks for confirming your identity.');
+    var balance=session.conversationData.orderNUmber%4;
+	if(orderNumber < 10000 || orderNumber >1000000){
+		session.send('Please enter a valid order number');
+		session.endDialog();
+		//session.
+	}
     if(balance == 0){
       session.send("Your order will be shipped today evening. You will be receiving it in 2 days");
       session.beginDialog('onTimeDelivery');
@@ -788,13 +1051,86 @@ bot.dialog('handleProductStatus', [
       session.beginDialog('handleDelayDelivery');
     }
 
-	}
+	}*/
 ]).triggerAction({
     matches: 'Order Status',
     onInterrupted: function (session) {
         session.send('Starting Order Cancellation');
     }
 });
+
+
+
+bot.dialog('handleOrderCancellationSimplified', [
+    function (session) {
+        
+		builder.Prompts.text(session, 'Please let us know your reason for cancelling your order');
+
+    },
+  /*  function (session, results) {
+		//TODO Order number validation
+		builder.Prompts.text(session, 'Thanks for providing the order number. In order to ensure authenticity, we have emailed a OTP send an OTP to the e-mail Id of the order and also the telephone number. Please enter the number to proceed further');
+  },*/
+	function (session, results) {
+		
+		session.send('Your order has been cancelled');
+		var messageEnteredByUser=results.response;
+        console.log('In final step of delay delivery, message entered is: %s',messageEnteredByUser);
+        if(results.response){
+          var intent='';
+          LUISclient.predict(results.response, {
+
+              //On success of prediction
+                onSuccess: function (response) {
+                var intent = response.topScoringIntent.intent;
+                var intentsSize=response.intents.length;
+                console.log('Intents length is %s',intentsSize);
+                console.log('intent received is %s',response.topScoringIntent.intent);
+                //printOnSuccess(response);
+                console.log('Intent is:. %s',intent);
+                //var messageToSend=getTextForIntent(intent);
+                if (intent == 'ShowingSignsOfLeaving' || intent == 'Escalation' ){ 
+                  session.beginDialog("handleEscalationOption");
+                }else {
+                  session.send('As a preferred customer, we would like to offer you $50 discount coupon.');
+				  session.send('Coupon details have been e-mailed to you.');
+				  //session.endConversation();
+				  session.beginDialog("generalConversationNew");
+                }
+
+              },
+
+            //On failure of prediction
+               onFailure: function (err) {
+                console.error(err);
+              }
+            });
+          }
+		
+
+	}
+]).triggerAction({
+    matches: 'OrderCancellation',
+    onInterrupted: function (session) {
+        session.send('Starting Order Cancellation');
+    }
+});
+
+bot.dialog('handleEscalationOption', [
+    function (session) {
+       builder.Prompts.confirm(session, "Hope we were able to cater to your needs. Would you like to talk to a representative?");
+    },
+    function (session,results) {
+       var decision=results.response;
+       if(session.message.text == 'YES' || session.message.text == 'Yes'){
+         session.send('You may contact 1-434-385-5775 for any questions');
+		 session.send('You may contact 1-434-385-5775 for any questions');
+       }
+	   session.send('Thank you for contacting us.');
+
+    }
+]);
+
 
 bot.dialog('getPreferredTiming', [
     function (session) {
@@ -910,7 +1246,18 @@ bot.dialog('NotAngryDuetoDelay', [
     }
 ]);
 
+bot.dialog('handleAddressChange', [
+    function (session) {
+       builder.Prompts.text(session, "Please enter the new address to which you would like to ship your product(Enter in a signle line)");
+    },
+    function (session,results) {
+       session.send('Your order will be delivered to your new address.');
+	   session.send('Thank you for contacting us.');
+	   //session.endConversation();
+	   session.beginDialog("generalConversationNew");
 
+    }
+]);
 
 
 if (useEmulator) {
@@ -998,7 +1345,8 @@ function getDialogForIntent(intentVal){
     chosendialog='productNotRequired';
   }
   if (intentVal == 'ReturnAndCancellation'){
-    chosendialog='handleOrderCancellation';
+    //chosendialog='handleOrderCancellation';
+	chosendialog='handleOrderCancellationSimplified';
   }
   if(intentVal == 'OrderStatus'){
     chosendialog='handleProductStatus';

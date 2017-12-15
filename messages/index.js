@@ -1118,15 +1118,16 @@ bot.dialog('handleOrderCancellationSimplified', [
 
 bot.dialog('handleEscalationOption', [
     function (session) {
-       builder.Prompts.confirm(session, "Hope we were able to cater to your needs. Would you like to talk to a representative?");
+       builder.Prompts.choice(session, "Hope we were able to cater to your needs. Would you like to talk to a representative?", "Yes|No", { listStyle: builder.ListStyle.button });
     },
     function (session,results) {
        var decision=results.response;
        if(session.message.text == 'YES' || session.message.text == 'Yes'){
          session.send('You may contact 1-434-385-5775 for any questions');
-		 session.send('You may contact 1-434-385-5775 for any questions');
+		// session.send('You may contact 1-434-385-5775 for any questions');
        }
 	   session.send('Thank you for contacting us.');
+	   session.beginDialog("generalConversationNew");
 
     }
 ]);

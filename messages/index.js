@@ -71,6 +71,9 @@ var bot = new builder.UniversalBot(connector, [
 			}else{
 				builder.Prompts.text(session, 'Good Evening. Please let us know how we can help you.');
 			}
+			var messageTyped=session.message.text;
+				
+				//handleIntentForMessages(session);
 			}
 			else{
 				

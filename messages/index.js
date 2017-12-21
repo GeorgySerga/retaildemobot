@@ -412,13 +412,13 @@ bot.dialog('handleOrderCancellationNoOrderNumber', [
     //builder.Prompts.text(session, ' Could you please let us know the reason for the order cancellation');
 
 	}
-])
-.triggerAction({
+]);
+/*.triggerAction({
     matches: [/cancel/i,/ordercancel/i, /order cancellation/],
     onInterrupted: function (session) {
-        session.send('Starting Order Cancellation');
+       builder.Prompts.text(session, 'Please enter the order number which you would like to cancel');
     }
-});
+});*/
 
 /*
 bot.dialog('support', require('./support'))

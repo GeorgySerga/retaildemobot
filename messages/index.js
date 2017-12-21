@@ -58,8 +58,11 @@ var LUISclient = LUISClient({
 
 
 var bot = new builder.UniversalBot(connector, [
-
+	
+		
 		function (session) {
+			if(session.conversationData.newuserchat ==null){
+				
 			var hours = (new Date()).getUTCHours()-5;
 			if (hours <12){
 				builder.Prompts.text(session, 'Good morning. Please let us know how we can help you.');
@@ -68,8 +71,18 @@ var bot = new builder.UniversalBot(connector, [
 			}else{
 				builder.Prompts.text(session, 'Good Evening. Please let us know how we can help you.');
 			}
+			}
+			else{
+				
+				var messageTyped=session.message.text;
+				
+				handleIntentForMessages(session);
+				
+				//builder.Prompts.text(session, 'Please let us know how we can help you. We can help you to improve youe shopping experience with JCrew.com');
+			}
 		},
     function (session,results) {
+		session.conversationData.newuserchat=false;
 		console.log('Starting message new is %s',session.message.text);
 		console.log('Session state in new  one is %s',session.sessionState.callstack.state);
 		console.log('Session Reset in new one is %s',session.isReset());
@@ -86,96 +99,10 @@ var bot = new builder.UniversalBot(connector, [
         session.send(reply);*/
 		//session.beginDialog('generalConversation');
 
-		var intent='';
-		LUISclient.predict(session.message.text, {
-
-				//On success of prediction
-					onSuccess: function (response) {
-					intent = response.topScoringIntent.intent;
-					console.log('intent received is %s',response.topScoringIntent.intent);
-					console.log('Intent is:. %s',intent);
-
-					console.log('Intent is:. %s',intent);
-          if(intent == 'offers'){
-            session.send(getTextForIntent("offers"));
-          }
-					else if (intent == 'ReturnAndCancellation'){
-						//session.beginDialog('handleOrderCancellationSimplified');
-						session.beginDialog('handleOrderCancellationSimplified');
-					}else if (intent == 'OrderStatus'){
-            session.beginDialog('handleProductStatus');
-          }
-          else{
-						var cards = new Array();
-						cards.push(createThumbnailCard(session, "images/customerservice.jpg",'', 'customerService','Customer Service- Refund, Cancel, Order Status Inquiry','Initiate Service Request'));
-						cards.push(createThumbnailCard(session, 'http://www.woodtel.com/thumbnail.jpg','', 'initiateBrowsing','Browse and Shop for Products','Shop Now'));
-						var reply = new builder.Message(session)
-						.text('Type your questions and we will help you')
-					//	.attachmentLayout(builder.AttachmentLayout.list)
-					//	.attachments(cards);
-						session.send(reply);
-					}
-
-					//printOnSuccess(response);
-
-			},
-
-			//On failure of prediction
-					onFailure: function (err) {
-					console.error(err);
-			}
-		});
+		handleIntentForMessages(session);
 
 
         //session.beginDialog('conversationwithuser');
-    },
-
-    function (session, results) {
-		console.log('Session state in two is %s',session.sessionState.callstack.state);
-		console.log('Session Reset in two is %s',session.isReset());
-		console.log('tesxt to search is %s',results.response);
-        //session.dialogData.reservationDate = builder.EntityRecognizer.resolveTime([results.response]);
-
-
-		var intent='';
-		LUISclient.predict(results.response, {
-
-				//On success of prediction
-					onSuccess: function (response) {
-					var intent = response.topScoringIntent.intent;
-					console.log('intent received is %s',response.topScoringIntent.intent);
-					//printOnSuccess(response);
-					console.log('Intent is:. %s',intent);
-          var dialogForIntent=getDialogForIntent(intent);
-          if(dialogForIntent != 'NA'){
-            session.beginDialog('handleOrderCancellationSimplified');
-          }
-					/*if (intent == 'ReturnAndCancellation'){
-						session.beginDialog('handleOrderCancellationSimplified');
-					}*/
-          else{
-						var messageToSend=getTextForIntent(intent);
-						session.send(messageToSend);
-            if(intent == 'ClosingNotes_Happy'){
-              session.endConversation();
-            }
-					}
-			},
-
-			//On failure of prediction
-					onFailure: function (err) {
-					console.error(err);
-			}
-		});
-		/*
-		console.log('Intent is:. %s',intent);
-		//session.routeToActiveDialog(results);
-		session.send('Intent is:. %s',intent);*/
-		//builder.Prompts.text(session, 'Intent is:. %s',intent);
-
-
-        //builder.Prompts.text(session, "How many people are in your party?");
-
     }
 
 ]);
@@ -205,95 +132,10 @@ bot.dialog('generalConversationNew', [
         session.send(reply);*/
 		//session.beginDialog('generalConversation');
 
-		var intent='';
-		LUISclient.predict(session.message.text, {
-
-				//On success of prediction
-					onSuccess: function (response) {
-					intent = response.topScoringIntent.intent;
-					console.log('intent received is %s',response.topScoringIntent.intent);
-					console.log('Intent is:. %s',intent);
-
-					console.log('Intent is:. %s',intent);
-          if(intent == 'offers'){
-            session.send(getTextForIntent("offers"));
-          }
-					else if (intent == 'ReturnAndCancellation'){
-						session.beginDialog('handleOrderCancellationSimplified');
-					}else if (intent == 'OrderStatus'){
-            session.beginDialog('handleProductStatus');
-          }
-          else{
-						var cards = new Array();
-						cards.push(createThumbnailCard(session, "images/customerservice.jpg",'', 'customerService','Customer Service- Refund, Cancel, Order Status Inquiry','Initiate Service Request'));
-						cards.push(createThumbnailCard(session, 'http://www.woodtel.com/thumbnail.jpg','', 'initiateBrowsing','Browse and Shop for Products','Shop Now'));
-						var reply = new builder.Message(session)
-						.text('Type your questions and we will help you')
-					//	.attachmentLayout(builder.AttachmentLayout.list)
-					//	.attachments(cards);
-						session.send(reply);
-					}
-
-					//printOnSuccess(response);
-
-			},
-
-			//On failure of prediction
-					onFailure: function (err) {
-					console.error(err);
-			}
-		});
+		handleIntentForMessages(session);
 
 
         //session.beginDialog('conversationwithuser');
-    },
-
-    function (session, results) {
-		console.log('Session state in two is %s',session.sessionState.callstack.state);
-		console.log('Session Reset in two is %s',session.isReset());
-		console.log('tesxt to search is %s',results.response);
-        //session.dialogData.reservationDate = builder.EntityRecognizer.resolveTime([results.response]);
-
-
-		var intent='';
-		LUISclient.predict(results.response, {
-
-				//On success of prediction
-					onSuccess: function (response) {
-					var intent = response.topScoringIntent.intent;
-					console.log('intent received is %s',response.topScoringIntent.intent);
-					//printOnSuccess(response);
-					console.log('Intent is:. %s',intent);
-          var dialogForIntent=getDialogForIntent(intent);
-          if(dialogForIntent != 'NA'){
-            session.beginDialog('handleOrderCancellationSimplified');
-          }
-					/*if (intent == 'ReturnAndCancellation'){
-						session.beginDialog('handleOrderCancellationSimplified');
-					}*/
-          else{
-						var messageToSend=getTextForIntent(intent);
-						session.send(messageToSend);
-            if(intent == 'ClosingNotes_Happy'){
-              session.endConversation();
-            }
-					}
-			},
-
-			//On failure of prediction
-					onFailure: function (err) {
-					console.error(err);
-			}
-		});
-		/*
-		console.log('Intent is:. %s',intent);
-		//session.routeToActiveDialog(results);
-		session.send('Intent is:. %s',intent);*/
-		//builder.Prompts.text(session, 'Intent is:. %s',intent);
-
-
-        //builder.Prompts.text(session, "How many people are in your party?");
-
     }
 	
 	
@@ -374,171 +216,9 @@ bot.dialog('/', [
 ]);
 */
 
-bot.dialog('conversationwithuser', [
 
 
-	function (session) {
-        //builder.Prompts.time(session, "Please provide a reservation date and time (e.g.: June 6th at 5pm)");
-    },
-    function (session, results) {
-		session.send('You have entered: \'%s\'', session.message.text);
-        //session.endDialogWithResult(results);
-    }
 
-	/*function (session, args, next) {
-		console.log('Conversation session, args, next');
-        //session.send('Welcome to the IoT: \'%s\'', session.message.text);
-		builder.Prompts.text(session, 'Please Let us know how we can help you in IoT');
-        // try extracting entities
-    },
-    function (session, results) {
-        var destination = results.response;
-		console.log('Conversation In session,results');
-		session.send('result is:\'%s\'',results.response);
-        var message = 'DUMMY Conversation SEARCH RESULT';
-		builder.Prompts.text(session, message);
-        //session.send(message, destination);
-    }*/
-
-]);
-
-bot.dialog('generalConversation', [
-
-
-	function (session) {
-		var inputMessage=session.message.text;
-		console.log('Starting generalConversation is %s',session.message.text);
-		if(inputMessage.indexOf('action?') == -1) {
-
-
-		console.log('Starting generalConversation is %s',session.message.text);
-		console.log('Session state in generalConversation is %s',session.sessionState.callstack.state);
-		console.log('Session Reset in generalConversation is %s',session.isReset());
-		console.log('Session messageSent in generalConversation is %s',session.messageSent());
-		console.log('tesxt to search is %s',session.message.text);
-		var intent='';
-		LUISclient.predict(session.message.text, {
-
-				//On success of prediction
-					onSuccess: function (response) {
-					intent = response.topScoringIntent.intent;
-					console.log('intent received in general conversation is %s',response.topScoringIntent.intent);
-					console.log('Intent is:. %s',intent);
-          var dialogToInitiate=getDialogForIntent(intent);
-          if(dialogToInitiate != 'NA'){
-            session.beginDialog(dialogToInitiate);
-          }else{
-            var messageToSend=getTextForIntent(intent);
-            session.say(messageToSend);
-          }
-        /*  if(intent == 'ReturnReason_LateDeliveryTime'){
-            var messageToSend=getTextForIntent(intent);
-            console.log('Message received is is:. %s',messageToSend);
-  					session.say(messageToSend);
-            session.beginDialog('lateDelivery');
-          }else if (intent == 'ReturnReason_NotRequiredAlreadyObtained') {
-          //  var messageToSend=getTextForIntent(intent);
-          //  console.log('Message received is is:. %s',messageToSend);
-  				//	session.say(messageToSend);
-            session.beginDialog('productNotRequired');
-          }*/
-        /*  {
-
-        }*/
-
-					//printOnSuccess(response);
-
-			},
-
-			//On failure of prediction
-					onFailure: function (err) {
-					console.error(err);
-			}
-		});
-
-
-        //session.beginDialog('conversationwithuser');
-	}else{
-		console.log('Not entering as started from other conversation');
-    }
-	},
-
-    function (session, results) {
-		console.log('General conversation Session state in two is %s',session.sessionState.callstack.state);
-		console.log('General conversation Session Reset in two is %s',session.isReset());
-		console.log('General conversation tesxt to search is %s',results.response);
-        //session.dialogData.reservationDate = builder.EntityRecognizer.resolveTime([results.response]);
-    if(results.response){
-      var intent='';
-  		LUISclient.predict(results.response, {
-
-  				//On success of prediction
-  					onSuccess: function (response) {
-  					var intent = response.topScoringIntent.intent;
-  					console.log('intent received is %s',response.topScoringIntent.intent);
-  					//printOnSuccess(response);
-  					console.log('Intent is:. %s',intent);
-            var dialogToInitiate=getDialogForIntent(intent);
-            if(dialogToInitiate != 'NA'){
-              session.beginDialog(dialogToInitiate);
-            }else{
-              var messageToSend=getTextForIntent(intent);
-              session.say(messageToSend);
-            }
-  					/*var messageToSend=getTextForIntent(intent);
-  					session.send(messageToSend);*/
-            //session.beginDialog("generalConversation");
-
-  			},
-
-  			//On failure of prediction
-  					onFailure: function (err) {
-  					console.error(err);
-  			}
-  		});
-
-    }else{
-      //var messageToSend=getTextForIntent(intent);
-      session.send("Thanks for providing the feedbak.Please let us know how we can help you.");
-      session.endConversation();
-    }
-
-
-		/*
-		console.log('Intent is:. %s',intent);
-		//session.routeToActiveDialog(results);
-		session.send('Intent is:. %s',intent);*/
-		//builder.Prompts.text(session, 'Intent is:. %s',intent);
-
-
-        //builder.Prompts.text(session, "How many people are in your party?");
-
-    }
-
-]);
-
-
-bot.dialog('SubsequentConversation', [
-
-	function (session, args) {
-		console.log('Conversation session, args, next');
-        //session.send('Welcome to the IoT: \'%s\'', session.message.text);
-		builder.Prompts.text(session, 'Please Let us know how we can help you in IoT');
-        // try extracting entities
-
-    },
-    function (session, results) {
-        var destination = results.response;
-		console.log('Conversation In session,results');
-
-        var message = 'DUMMY Conversation SEARCH RESULT';
-
-		builder.Prompts.text(session, message);
-        //session.send(message, destination);
-
-    }
-
-]);
 
  bot.dialog('/initiateBrowsing', [
 	//function (session){
@@ -556,18 +236,8 @@ bot.dialog('SubsequentConversation', [
             .attachmentLayout(builder.AttachmentLayout.carousel)
             .attachments(cards);
         session.send(reply);
-		session.beginDialog('generalConversation');
-
-    },
-    function (session, results) {
-        var destination = results.response;
-		console.log('Conversation In session,results');
-
-        var message = 'DUMMY Conversation SEARCH RESULT --'+destination;
-
-		//builder.Prompts.text(session, message);
-        //session.send(message, destination);
-		session.beginDialog('generalConversation');
+		//session.beginDialog('generalConversation');
+		session.endDialog();
 
     }
 
@@ -580,22 +250,12 @@ bot.dialog('/customerService', [
 	function (session, args) {
 		console.log('Conversation session, args, next');
         //session.send('Welcome to the IoT: \'%s\'', session.message.text);
-		builder.Prompts.text(session, 'Welcome to customer Service');
+		session.send('Welcome to customer Service');
+		session.send('We can help you in tracking order status and address change of order');
         // try extracting entities
-
-    },
-    function (session, results) {
-        var destination = results.response;
-		console.log('Conversation In session,results');
-
-        var message = 'Customer service results';
-
-		//builder.Prompts.text(session, message);
-        //session.send(message, destination);
-		session.beginDialog('generalConversation');
+		session.endDialog();
 
     }
-
 ]);
 
 
@@ -609,17 +269,7 @@ bot.dialog('/listPopularWomenProduct', [
         //session.send('Welcome to the IoT: \'%s\'', session.message.text);
 		builder.Prompts.text(session, 'Welcome to Women products');
         // try extracting entities
-
-    },
-    function (session, results) {
-        var destination = results.response;
-		console.log('Conversation In session,results');
-
-        var message = 'In women product result';
-
-		//builder.Prompts.text(session, message);
-        //session.send(message, destination);
-		session.beginDialog('generalConversation');
+		session.endDialog();
 
     }
 
@@ -642,7 +292,7 @@ bot.dialog('/listPopularMenProduct', [
             .attachmentLayout(builder.AttachmentLayout.carousel)
             .attachments(cards);
         session.send(reply);
-		session.beginDialog('generalConversation');
+		//session.beginDialog('generalConversation');
 
     },
     function (session, results) {
@@ -653,7 +303,7 @@ bot.dialog('/listPopularMenProduct', [
 
 		//builder.Prompts.text(session, message);
         //session.send(message, destination);
-		session.beginDialog('generalConversation');
+		session.endDialog();
 
     }
 
@@ -678,7 +328,7 @@ bot.dialog('/listPopularBoysProduct', [
 
 		//builder.Prompts.text(session, message);
         //session.send(message, destination);
-		session.beginDialog('generalConversation');
+		session.endDialog();
 
     }
 
@@ -694,18 +344,8 @@ bot.dialog('/addToCart', [
         //session.send('Welcome to the IoT: \'%s\'', session.message.text);
 		builder.Prompts.text(session, 'Product Added to Cart');
         // try extracting entities
+		session.endDialog();
 
-    },
-    function (session, results) {
-        var destination = results.response;
-		console.log('Conversation In session,results');
-
-        var message = 'In add to cart result 2';
-
-		//builder.Prompts.text(session, message);
-        //session.send(message, destination);
-		session.beginDialog('generalConversation');
-session.say(messageToSend);
     }
 
 ]);
@@ -734,17 +374,58 @@ bot.dialog('handleOrderCancellation', [
 		//TODO Get  status of Order in random from a list of order status and display a message accordingly
 		//builder.Prompts.text('Thanks for confirming the order. Since the order is yet to be shipped, we will refund the money in next two working days');
 		//session.say('Thanks for confirming the order. Since the order is yet to be shipped, we will refund the money in next two working days');
-    session.beginDialog('generalConversation');
+   // session.beginDialog('generalConversation');
+    session.endDialog();
     //builder.Prompts.text(session, ' Could you please let us know the reason for the order cancellation');
 
 	}
-]).triggerAction({
-    matches: 'OrderCancellation',
+]);
+/*.triggerAction({
+    matches: [/cancel/i,/ordercancel/i, /order cancellation/],
+    onInterrupted: function (session) {
+        session.send('Starting Order Cancellation');
+    }
+});*/
+
+
+bot.dialog('handleOrderCancellationNoOrderNumber', [
+    function (session) {
+       // session.send('Welcome to the Hotels finder! We are analyzing your message: \'%s\'', session.message.text);
+
+        // try extracting entities
+		builder.Prompts.text(session, 'Please enter the order number which you would like to cancel');
+
+    },
+  /*  function (session, results) {
+		//TODO Order number validation
+		builder.Prompts.text(session, 'Thanks for providing the order number. In order to ensure authenticity, we have emailed a OTP send an OTP to the e-mail Id of the order and also the telephone number. Please enter the number to proceed further');
+  },*/
+	function (session, results) {
+		session.beginDialog('handleOrderCancellationSimplified');
+
+	},function (session, results) {
+		//TODO Get  status of Order in random from a list of order status and display a message accordingly
+		//builder.Prompts.text('Thanks for confirming the order. Since the order is yet to be shipped, we will refund the money in next two working days');
+		//session.say('Thanks for confirming the order. Since the order is yet to be shipped, we will refund the money in next two working days');
+			//session.beginDialog('generalConversation');
+			session.endDialog();
+    //builder.Prompts.text(session, ' Could you please let us know the reason for the order cancellation');
+
+	}
+])
+.triggerAction({
+    matches: [/cancel/i,/ordercancel/i, /order cancellation/],
     onInterrupted: function (session) {
         session.send('Starting Order Cancellation');
     }
 });
 
+/*
+bot.dialog('support', require('./support'))
+    .triggerAction({
+        matches: [/help/i, /support/i, /problem/i]
+    });
+*/
 
 bot.dialog('lateDelivery', [
     function (session) {
@@ -919,15 +600,7 @@ bot.dialog('handleProductStatusInvalid', [
     
 
 	}
-]).triggerAction({
-    matches: 'Order Status',
-    onInterrupted: function (session) {
-        session.send('Starting Order Cancellation');
-    }
-});
-
-
-
+]);
 
 
 
@@ -968,9 +641,9 @@ bot.dialog('handleProductStatus', [
 
 	}
 ]).triggerAction({
-    matches: 'Order Status',
+    matches: [/order status/i,/status/i, /orderstatus/],
     onInterrupted: function (session) {
-        session.send('Starting Order Cancellation');
+      //  session.send('Starting Order Cancellation');
     }
 });
 
@@ -1052,12 +725,7 @@ bot.dialog('handleProductStatusValid', [
     }
 
 	}*/
-]).triggerAction({
-    matches: 'Order Status',
-    onInterrupted: function (session) {
-        session.send('Starting Order Cancellation');
-    }
-});
+]);
 
 
 
@@ -1109,12 +777,7 @@ bot.dialog('handleOrderCancellationSimplified', [
 		
 
 	}
-]).triggerAction({
-    matches: 'OrderCancellation',
-    onInterrupted: function (session) {
-        session.send('Starting Order Cancellation');
-    }
-});
+]);
 
 bot.dialog('handleEscalationOption', [
     function (session) {
@@ -1258,6 +921,41 @@ bot.dialog('handleAddressChange', [
 	   session.beginDialog("generalConversationNew");
 
     }
+]).triggerAction({
+    matches: [/address change/i,/change address/i, /update address/i, /order address/i,/update order address/i,/change order address/i],
+    onInterrupted: function (session) {
+        session.send('Please enter the new address to which you would like to ship your product(Enter in a signle line)');
+    }
+});
+
+bot.dialog('handleOfferRequests', [
+    function (session) {
+       //builder.Prompts.text(session, "Please enter the new address to which you would like to ship your product(Enter in a signle line)");
+	   session.send("Following offers are currently available 1. 10% off on all purchases above $200. 2. Free next day delivery on all orders above $100 3.Free shipping on all orders above $75");
+    }
+]).triggerAction({
+    matches: [/offer/i,/offer available/i, /offers available/i, /active offers/i,/active offer/i],
+    onInterrupted: function (session) {
+        session.send("Following offers are currently available 1. 10% off on all purchases above $200. 2. Free next day delivery on all orders above $100 3.Free shipping on all orders above $75");
+    }
+});
+
+bot.dialog('NA', [
+    function (session) {
+       //builder.Prompts.text(session, "Please enter the new address to which you would like to ship your product(Enter in a signle line)");
+	   session.send("We are sorry, you have typed a request we could not help you");
+	   session.send("Please type a question related to your jcrew.com experience");
+	   //session.endConversation();
+	   session.endDialog();
+    }
+]);
+
+bot.dialog('handleIntroduction', [
+    function (session) {
+       //builder.Prompts.text(session, "Please enter the new address to which you would like to ship your product(Enter in a signle line)");
+	   session.send("Please let us know how we can help you. We can help you to improve youe shopping experience with jcrew.com");
+	  // session.send("Please type a question related to your jcrew.com experience");
+    }
 ]);
 
 
@@ -1307,32 +1005,7 @@ function getTextForIntent(intentvalue){
   }else{
 		chatreplytext='Please contact our customer support at 1-800-562-0258 to help you further.';
 	}
-	/*else if(intentvalue == 'assessment'){
-		chatreplytext='Various industry leaders have started their IoT journey by first evaluating the needs and gaps. We can help you with that thorugh our assessment.';
-	}else if(intentvalue == 'assessmentneed'){
-		chatreplytext='Various industry leaders have started their IoT journey by first evaluating the needs and gaps. We can help you with that thorugh our assessment.';
-	}else if(intentvalue == 'bootcampneed'){
-		chatreplytext='As an Individual, first step In IoT is to understand where you stand and identifying your skill gaps. Our bootcamp will help you to identify the gaps and helps you to understand them.';
-	}
-	else if(intentvalue == 'iotIntroduction'){
-		chatreplytext='We help enterprises implement IoT solutions. We also have indutry leading bootcamp to train professionals in IoT.';
-	}
-	else if(intentvalue == 'service'){
-		chatreplytext='We provide Technology consulting in IoT,BigData, Analytics, UI/UX and cloud transformations. We also have indutry leading bootcamp to train professionals in UX,Full Stack development, Data Engineering and IoT.';
-	}else if(intentvalue == 'starttraining'){
-		chatreplytext='Please start your training by accessing http://iotbootcamp.techolution.com You would first need to take initial assessment.';
-	}else if(intentvalue == 'training'){
-		chatreplytext='We offer trainings in Cloud transformation,UI/UX,BigData and IoT. We are Microsoft approved trainers and proud partners of Pivotal CloudFoundry.';
-	}
-	else if(intentvalue == 'training content'){
-		chatreplytext='Our IoT training focusses on Azure IoT platform and we cover IoT hub,Device Management,IoT Edge, Stream Analytics, Event Hubs, Event grid,Azure functions, Azure ML,Visualization and HDInsight.';
-	}else if(intentvalue == 'contact'){
-		chatreplytext='Please drop an e-mail along with your contact number and question to sales@techolution.com  We will get back to you at the earliest.';
-	}else if(intentvalue == 'trainingneed'){
-		chatreplytext='Our Initial assement test would act as SWOT analysis for your IoT skills and where you need to focus. Take our assessment from http://iotbootcamp.techolution.com';
-	}else{
-		chatreplytext='Welcome to Techolution. We are visionary IT consulting firm specializing in IoT and Analytics. We would be happy to help you.';
-	}*/
+	
 	return chatreplytext;
 }
 
@@ -1347,10 +1020,13 @@ function getDialogForIntent(intentVal){
   }
   if (intentVal == 'ReturnAndCancellation'){
     //chosendialog='handleOrderCancellation';
-	chosendialog='handleOrderCancellationSimplified';
+	chosendialog='handleOrderCancellationNoOrderNumber';
   }
   if(intentVal == 'OrderStatus'){
     chosendialog='handleProductStatus';
+  }
+  if(intentVal == 'Introduction'){
+    chosendialog='handleIntroduction';
   }
   return chosendialog;
 }
@@ -1387,6 +1063,62 @@ function createThumbnailCardForProducts(session,url,titleText,priceValue,pageUrl
             builder.CardAction.dialogAction(session,"addToCart","","Add to Cart"),
 			builder.CardAction.openUrl(session,pageUrl,"See in website")
         ]);
+}
+
+function handleIntentForMessages(session){
+	
+		var intent='';
+		LUISclient.predict(session.message.text, {
+
+				//On success of prediction
+					onSuccess: function (response) {
+					intent = response.topScoringIntent.intent;
+					console.log('Response is');
+					console.log(response.topScoringIntent);
+					console.log(response)
+					var score= response.topScoringIntent.score;
+					
+					
+					console.log('intent received is %s',response.topScoringIntent.intent);
+					console.log('Intent is:. %s',intent);
+					if(score < 0.4){
+						session.beginDialog('NA');
+					}else{
+						var dialog=getDialogForIntent(intent);
+						session.beginDialog(dialog);
+					}
+					
+				/*	console.log('Intent is:. %s',intent);
+          if(intent == 'offers'){
+            session.send(getTextForIntent("offers"));
+          }
+					else if (intent == 'ReturnAndCancellation'){
+						//session.beginDialog('handleOrderCancellationSimplified');
+						session.beginDialog('handleOrderCancellationSimplified');
+					}else if (intent == 'OrderStatus'){
+            session.beginDialog('handleProductStatus');
+          }
+          else{
+						var cards = new Array();
+						cards.push(createThumbnailCard(session, "images/customerservice.jpg",'', 'customerService','Customer Service- Refund, Cancel, Order Status Inquiry','Initiate Service Request'));
+						cards.push(createThumbnailCard(session, 'http://www.woodtel.com/thumbnail.jpg','', 'initiateBrowsing','Browse and Shop for Products','Shop Now'));
+						var reply = new builder.Message(session)
+						.text('Type your questions and we will help you')
+					//	.attachmentLayout(builder.AttachmentLayout.list)
+					//	.attachments(cards);
+						session.send(reply);
+					}
+
+					//printOnSuccess(response);*/
+					
+
+			},
+
+			//On failure of prediction
+					onFailure: function (err) {
+					console.error(err);
+			}
+		});
 }
 
 bot.beginDialogAction('initiateBrowsing', '/initiateBrowsing');

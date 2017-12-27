@@ -61,52 +61,78 @@ var bot = new builder.UniversalBot(connector, [
 	
 		
 		function (session) {
-			if(session.conversationData.newuserchat ==null){
+			
+			console.log("LAST OPS:",session.conversationData.lastops);
+			if(!session.conversationData.lastops){
+				console.log("INSIDE null of lastops");
+				var intent='NA';
 				
-			var hours = (new Date()).getUTCHours()-5;
-			if (hours <12){
-				builder.Prompts.text(session, 'Good morning. Please let us know how we can help you.');
-			}else if(hours <18){
-				builder.Prompts.text(session, 'Good Afternoon. Please let us know how we can help you.');
-			}else{
-				builder.Prompts.text(session, 'Good Evening. Please let us know how we can help you.');
-			}
-			var messageTyped=session.message.text;
+				LUISclient.predict(session.message.text, {
+					
+						//On success of prediction
+							onSuccess: function (response) {
+								
+							intent = response.topScoringIntent.intent;
+							console.log('Response is');
+							console.log(response.topScoringIntent);
+							console.log(response)
+							var score= response.topScoringIntent.score;
+							
+							
+							console.log('intent received in start is %s',response.topScoringIntent.intent);
+							
+							console.log('Intent start is:. %s',intent);
+							if(score < 0.4){
+								console.log('Setting intent in start to NA as score of top scoring intetnt is %s',score);
+								intent='NA';
+							}
+							
+							console.log("Intent received is %s",intent )
+							if(intent == 'Introduction' ){
+								var hours = (new Date()).getUTCHours()-5;
+							if (hours <12){
+									session.send( 'Good morning. Please let us know how we can help you.');
+							}else if(hours <18){
+								session.send('Good Afternoon. Please let us know how we can help you.');
+							}else{
+								session.send('Good Evening. Please let us know how we can help you.');
+							}
+							var messageTyped=session.message.text;
+							session.conversationData.lastops='start';
+							}else{
+								var dialog=getDialogForIntent(intent);
+								session.beginDialog(dialog);
+								
+							}
+							
+							},
+
+					//On failure of prediction
+							onFailure: function (err) {
+							console.error(err);
+							
+						}
+				});
+				
+				
+				
 				
 				//handleIntentForMessages(session);
+				
+			}else{
+				console.log("INSIDE lastops Not null :",session.conversationData.lastops);
+				if(session.conversationData.lastops == 'startOrderCancellation'){
+					session.beginDialog('handleOrderCancellationSimplified');
+					
+				}
+				else{
+					handleIntentForMessages(session);
+				}
+				
 			}
-			else{
-				
-				var messageTyped=session.message.text;
-				
-				handleIntentForMessages(session);
-				
-				//builder.Prompts.text(session, 'Please let us know how we can help you. We can help you to improve youe shopping experience with JCrew.com');
-			}
-		},
-    function (session,results) {
-		session.conversationData.newuserchat=false;
-		console.log('Starting message new is %s',session.message.text);
-		console.log('Session state in new  one is %s',session.sessionState.callstack.state);
-		console.log('Session Reset in new one is %s',session.isReset());
-		console.log('Session messageSent new in one is %s',session.messageSent());
-		console.log('tesxt to search is %s',session.message.text);
-		/*
-		var cards = new Array();
-		cards.push(createThumbnailCard(session, "images/customerservice.jpg",'', 'customerService','Customer Service- Refund, Cancel, Order Status Inquiry','Initiate Service Request'));
-		cards.push(createThumbnailCard(session, 'http://www.woodtel.com/thumbnail.jpg','', 'initiateBrowsing','Browse and Shop for Products','Shop Now'));
-		var reply = new builder.Message(session)
-            .text('Our chat agent can help you in following activities.')
-            .attachmentLayout(builder.AttachmentLayout.list)
-            .attachments(cards);
-        session.send(reply);*/
-		//session.beginDialog('generalConversation');
-
-		handleIntentForMessages(session);
-
-
-        //session.beginDialog('conversationwithuser');
-    }
+			
+		}
+		
 
 ]);
 
@@ -250,16 +276,24 @@ bot.dialog('/customerService', [
 	//	builder.Prompts.text(session, 'In Initate Message start');
 	//},
 
-	function (session, args) {
+	function (session) {
 		console.log('Conversation session, args, next');
         //session.send('Welcome to the IoT: \'%s\'', session.message.text);
 		session.send('Welcome to customer Service');
 		session.send('We can help you in tracking order status and address change of order');
         // try extracting entities
 		session.endDialog();
+		session.conversationData.lastops='customerservice';
 
     }
-]);
+]).triggerAction({
+    matches: [/service/i,/customer service/i, /customerservice/],
+    onInterrupted: function (session) {
+       session.send('Welcome to customer Service');
+		session.send('We can help you in tracking order status and address change of order');
+		session.conversationData.lastops='customerservice';
+    }
+});
 
 
 bot.dialog('/listPopularWomenProduct', [
@@ -271,6 +305,7 @@ bot.dialog('/listPopularWomenProduct', [
 		console.log('Conversation session, args, next');
         //session.send('Welcome to the IoT: \'%s\'', session.message.text);
 		builder.Prompts.text(session, 'Welcome to Women products');
+		session.conversationData.lastops='listPopularWomenProduct';
         // try extracting entities
 		session.endDialog();
 
@@ -295,18 +330,8 @@ bot.dialog('/listPopularMenProduct', [
             .attachmentLayout(builder.AttachmentLayout.carousel)
             .attachments(cards);
         session.send(reply);
+		session.conversationData.lastops='listPopularMenProduct';
 		//session.beginDialog('generalConversation');
-
-    },
-    function (session, results) {
-        var destination = results.response;
-		console.log('Conversation In session,results');
-
-        var message = 'In men product result 2';
-
-		//builder.Prompts.text(session, message);
-        //session.send(message, destination);
-		session.endDialog();
 
     }
 
@@ -321,17 +346,7 @@ bot.dialog('/listPopularBoysProduct', [
         //session.send('Welcome to the IoT: \'%s\'', session.message.text);
 		builder.Prompts.text(session, 'Welcome to Boys Product');
         // try extracting entities
-
-    },
-    function (session, results) {
-        var destination = results.response;
-		console.log('Conversation In session,results');
-
-        var message = 'In boys product result';
-
-		//builder.Prompts.text(session, message);
-        //session.send(message, destination);
-		session.endDialog();
+		session.conversationData.lastops='listPopularBoysProduct';
 
     }
 
@@ -346,6 +361,7 @@ bot.dialog('/addToCart', [
 		console.log('Product chosen %s',args);
         //session.send('Welcome to the IoT: \'%s\'', session.message.text);
 		builder.Prompts.text(session, 'Product Added to Cart');
+		session.conversationData.lastops='addToCart';
         // try extracting entities
 		session.endDialog();
 
@@ -358,77 +374,15 @@ bot.dialog('handleOrderCancellation', [
        // session.send('Welcome to the Hotels finder! We are analyzing your message: \'%s\'', session.message.text);
 
         // try extracting entities
-		builder.Prompts.text(session, 'Please enter the order number which you would like to cancel');
+		session.conversationData.lastops='startOrderCancellation';
+		session.send( 'Please enter the order number which you would like to cancel');
+		session.endDialog();
 
-    },
-  /*  function (session, results) {
-		//TODO Order number validation
-		builder.Prompts.text(session, 'Thanks for providing the order number. In order to ensure authenticity, we have emailed a OTP send an OTP to the e-mail Id of the order and also the telephone number. Please enter the number to proceed further');
-  },*/
-	function (session, results) {
-		//TODO Get  status of Order in random from a list of order status and display a message accordingly
-		//builder.Prompts.text('Thanks for confirming the order. Since the order is yet to be shipped, we will refund the money in next two working days');
-		//session.say('Thanks for confirming the order. Since the order is yet to be shipped, we will refund the money in next two working days');
-    session.say('Thanks for providing the order number. Since the order is yet to be shipped, we will refund the money in next two working days');
-  //  session.beginDialog('generalConversation');
-    builder.Prompts.text(session, ' Could you please let us know the reason for the order cancellation');
-
-	},function (session, results) {
-		//TODO Get  status of Order in random from a list of order status and display a message accordingly
-		//builder.Prompts.text('Thanks for confirming the order. Since the order is yet to be shipped, we will refund the money in next two working days');
-		//session.say('Thanks for confirming the order. Since the order is yet to be shipped, we will refund the money in next two working days');
-   // session.beginDialog('generalConversation');
-    session.endDialog();
-    //builder.Prompts.text(session, ' Could you please let us know the reason for the order cancellation');
-
-	}
-]);
-/*.triggerAction({
-    matches: [/cancel/i,/ordercancel/i, /order cancellation/],
-    onInterrupted: function (session) {
-        session.send('Starting Order Cancellation');
     }
-});*/
-
-
-bot.dialog('handleOrderCancellationNoOrderNumber', [
-    function (session) {
-       // session.send('Welcome to the Hotels finder! We are analyzing your message: \'%s\'', session.message.text);
-
-        // try extracting entities
-		builder.Prompts.text(session, 'Please enter the order number which you would like to cancel');
-
-    },
-  /*  function (session, results) {
-		//TODO Order number validation
-		builder.Prompts.text(session, 'Thanks for providing the order number. In order to ensure authenticity, we have emailed a OTP send an OTP to the e-mail Id of the order and also the telephone number. Please enter the number to proceed further');
-  },*/
-	function (session, results) {
-		session.beginDialog('handleOrderCancellationSimplified');
-
-	},function (session, results) {
-		//TODO Get  status of Order in random from a list of order status and display a message accordingly
-		//builder.Prompts.text('Thanks for confirming the order. Since the order is yet to be shipped, we will refund the money in next two working days');
-		//session.say('Thanks for confirming the order. Since the order is yet to be shipped, we will refund the money in next two working days');
-			//session.beginDialog('generalConversation');
-			session.endDialog();
-    //builder.Prompts.text(session, ' Could you please let us know the reason for the order cancellation');
-
-	}
 ]);
-/*.triggerAction({
-    matches: [/cancel/i,/ordercancel/i, /order cancellation/],
-    onInterrupted: function (session) {
-       builder.Prompts.text(session, 'Please enter the order number which you would like to cancel');
-    }
-});*/
 
-/*
-bot.dialog('support', require('./support'))
-    .triggerAction({
-        matches: [/help/i, /support/i, /problem/i]
-    });
-*/
+
+
 
 bot.dialog('lateDelivery', [
     function (session) {
@@ -557,13 +511,6 @@ bot.dialog('optionForBOPSNoOrder', [
     }
 ]);
 
-bot.dialog('productNotRequired', [
-    function (session) {
-      session.say("We understand that you have made a decision to go with a different provider for the product");
-      builder.Prompts.text(session,"Would you like to give feedback or would like us to help you in any ways");
-    }
-]);
-
 
 bot.dialog('handleProductStatusInvalid', [
     
@@ -576,6 +523,7 @@ bot.dialog('handleProductStatusInvalid', [
   },*/
   
 	function(session){
+		session.conversationData.lastops='handleProductStatusInvalid';
 		builder.Prompts.text(session,'Order number provided does not exist. Please enter a valid order number');
 	},
  	function (session,results) {
@@ -599,6 +547,7 @@ bot.dialog('handleProductStatusInvalid', [
 	}else{
 	//	session.endDialog();
 		session.beginDialog('handleProductStatusValid');
+		session.endDialog();
 	}
     
 
@@ -610,7 +559,7 @@ bot.dialog('handleProductStatusInvalid', [
 bot.dialog('handleProductStatus', [
     function (session) {
        // session.send('Welcome to the Hotels finder! We are analyzing your message: \'%s\'', session.message.text);
-
+		session.conversationData.lastops='handleProductStatusStart';
         // try extracting entities
 		builder.Prompts.text(session, 'Please enter your order number');
 
@@ -636,105 +585,41 @@ bot.dialog('handleProductStatus', [
 		//session.send('Please enter a valid order number');
 		//session.endDialog();
 		session.beginDialog('handleProductStatusInvalid');
+		//session.endDialog();
 		//session.
 	}else{
 		session.beginDialog('handleProductStatusValid');
+		session.endDialog();
 	}
    
 
 	}
-]).triggerAction({
+]);
+/*.triggerAction({
     matches: [/order status/i,/status/i, /orderstatus/],
     onInterrupted: function (session) {
       //  session.send('Starting Order Cancellation');
     }
 });
-
+*/
 bot.dialog('handleProductStatusValid', [
     function (session) {
        // session.send('Welcome to the Hotels finder! We are analyzing your message: \'%s\'', session.message.text);
+	   session.conversationData.lastops='handleProductStatusValid';
 		var orderNumber=session.conversationData.orderNUmber;
         // try extracting entities
 		session.send('Your order has been shipped. You will be receiving it in 3 days');
-		builder.Prompts.text(session, 'Please let us know how we may help with your order');
-
-    },
-  /*  function (session, results) {
-		//TODO Order number validation
-    var orderNumber= results.response;
-    session.conversationData.orderNUmber=orderNumber;
-		//builder.Prompts.text(session, 'Thanks for providing the order number. In order to ensure authenticity, we have emailed a OTP send an OTP to the e-mail Id of the order and also the telephone number. Please enter the number to proceed further');
-    session.send('Thanks for providing the order number.');
-  },*/
-  
-	function(session,results){
-		
-		var intent='';
-		LUISclient.predict(results.response, {
-			
-
-				//On success of prediction
-					onSuccess: function (response) {
-					var intent = response.topScoringIntent.intent;
-					console.log('intent received is %s',response.topScoringIntent.intent);
-					//printOnSuccess(response);
-					console.log('Intent is:. %s',intent);
-					
-					if(intent == 'ReturnAndCancellation'){
-						session.beginDialog('handleOrderCancellationSimplified');
-						
-					}
-					else if(intent == 'AddressChange')
-					{
-						session.beginDialog('handleAddressChange');
-					}
-					else{
-						session.send('Our apologize. Currently we support only order address change and order cancellation');
-						//session.endConversation();
-						session.beginDialog("generalConversationNew");
-					}
-          
-		},//On failure of prediction
-					onFailure: function (err) {
-					console.error(err);
-					}
-	});
-	},
- 	/*function (session, results) {
-
-    var orderNumber= results.response;
-    session.conversationData.orderNUmber=orderNumber;
-		//builder.Prompts.text(session, 'Thanks for providing the order number. In order to ensure authenticity, we have emailed a OTP send an OTP to the e-mail Id of the order and also the telephone number. Please enter the number to proceed further');
-    session.send('Thanks for providing the order number.');
-		//TODO Get  status of Order in random from a list of order status and display a message accordingly
-		//builder.Prompts.text('Thanks for confirming the order. Since the order is yet to be shipped, we will refund the money in next two working days');
-		//session.say('Thanks for confirming your identity.');
-    var balance=session.conversationData.orderNUmber%4;
-	if(orderNumber < 10000 || orderNumber >1000000){
-		session.send('Please enter a valid order number');
+		session.send('Please let us know how we may help with your order');
 		session.endDialog();
-		//session.
-	}
-    if(balance == 0){
-      session.send("Your order will be shipped today evening. You will be receiving it in 2 days");
-      session.beginDialog('onTimeDelivery');
-    }else if (balance == 1){
-        session.beginDialog('getPreferredTiming');
-    }else if (balance == 2){
-      session.send("Your order will be shipped as two packages. First package will arrive tomorrow. Next package will arrive in 3 days");
-      session.beginDialog('onTimeDelivery');
-    }else{
-      session.beginDialog('handleDelayDelivery');
-    }
 
-	}*/
+    }
 ]);
 
 
 
 bot.dialog('handleOrderCancellationSimplified', [
     function (session) {
-        
+         session.conversationData.lastops='askReasonForOrderCancellation';
 		builder.Prompts.text(session, 'Please let us know your reason for cancelling your order');
 
     },
@@ -745,6 +630,7 @@ bot.dialog('handleOrderCancellationSimplified', [
 	function (session, results) {
 		
 		session.send('Your order has been cancelled');
+		session.conversationData.lastops='ordercancelreasonaskedandresultderived';
 		var messageEnteredByUser=results.response;
         console.log('In final step of delay delivery, message entered is: %s',messageEnteredByUser);
         if(results.response){
@@ -766,7 +652,8 @@ bot.dialog('handleOrderCancellationSimplified', [
                   session.send('As a preferred customer, we would like to offer you $50 discount coupon.');
 				  session.send('Coupon details have been e-mailed to you.');
 				  //session.endConversation();
-				  session.beginDialog("generalConversationNew");
+				  //session.beginDialog("generalConversationNew");
+				  session.endDialog();
                 }
 
               },
@@ -784,144 +671,48 @@ bot.dialog('handleOrderCancellationSimplified', [
 
 bot.dialog('handleEscalationOption', [
     function (session) {
+		session.conversationData.lastops='askingescalationchoice';
        builder.Prompts.choice(session, "Hope we were able to cater to your needs. Would you like to talk to a representative?", "Yes|No", { listStyle: builder.ListStyle.button });
     },
     function (session,results) {
        var decision=results.response;
        if(session.message.text == 'YES' || session.message.text == 'Yes'){
          session.send('You may contact 1-434-385-5775 for any questions');
+		 session.conversationData.lastops='customerchosentoescalate';
+		 session.endDialog();
 		// session.send('You may contact 1-434-385-5775 for any questions');
-       }
-	   session.send('Thank you for contacting us.');
-	   session.beginDialog("generalConversationNew");
-
-    }
-]);
-
-
-bot.dialog('getPreferredTiming', [
-    function (session) {
-      session.send("Your order will be delivered tomorrow.");
-      builder.Prompts.text(session, 'Please let us know if you have any preferred time to deliver');
-
-    },
-    function (session, results) {
-		//TODO Order number validation
-    var orderNumber= results.response;
-
-		builder.Prompts.text(session, 'Customer satisfaction is our top priority. We are striving hard to delight our customers. Product will be delivered at the requested time. Please let us know how we could help you further.');
-
-    }
-
-]);
-
-bot.dialog('handleDelayDelivery', [
-    function (session) {
-       		builder.Prompts.text(session, 'We are sorry. Your package was supposed to be delivered today. Due to unavoidable circumstances, it will be delayed a day later');
-
-    },
-    function (session, results) {
-        var messageEnteredByUser=results.response;
-
-        if(results.response){
-          var intent='';
-          LUISclient.predict(results.response, {
-
-              //On success of prediction
-                onSuccess: function (response) {
-                var intent = response.topScoringIntent.intent;
-                var intentsSize=response.intents.length;
-                console.log('Intents length is %s',intentsSize);
-                console.log('intent received is %s',response.topScoringIntent.intent);
-                //printOnSuccess(response);
-                console.log('Intent is:. %s',intent);
-                var messageToSend=getTextForIntent(intent);
-                builder.Prompts.text(session,messageToSend);
-                //session.beginDialog("generalConversation");
-              },
-
-            //On failure of prediction
-               onFailure: function (err) {
-                console.error(err);
-              }
-            });
-          }
-    },
-    function (session, results) {
-        var messageEnteredByUser=results.response;
-        console.log('In final step of delay delivery, message entered is: %s',messageEnteredByUser);
-        if(results.response){
-          var intent='';
-          LUISclient.predict(results.response, {
-
-              //On success of prediction
-                onSuccess: function (response) {
-                var intent = response.topScoringIntent.intent;
-                var intentsSize=response.intents.length;
-                console.log('Intents length is %s',intentsSize);
-                console.log('intent received is %s',response.topScoringIntent.intent);
-                //printOnSuccess(response);
-                console.log('Intent is:. %s',intent);
-                //var messageToSend=getTextForIntent(intent);
-                if (intent == 'ShowingSignsOfLeaving'){
-                  session.beginDialog("handleSignsOfLeaving");
-                }else if(intent == 'Escalation'){
-                  builder.Prompts.text(session,"Customer satisfaction is our top priority. We are striving hard to delight our customers.If you are un happy with the responses please contact call centre at 1-800-123-4567");
-                }else {
-                  session.beginDialog("NotAngryDuetoDelay");
-                }
-                //session.send(messageToSend);
-
-              },
-
-            //On failure of prediction
-               onFailure: function (err) {
-                console.error(err);
-              }
-            });
-          }
-
-    }
-
-]);
-
-bot.dialog('onTimeDelivery', [
-    function (session) {
-       builder.Prompts.text(session,"Please provide your feedback or how would like us to help you in any ways");
-    }
-]);
-
-bot.dialog('handleSignsOfLeaving', [
-    function (session) {
-       builder.Prompts.confirm(session, "Customer satisfaction is our top priority. We are striving hard to delight our customers. We would like to offer one year free premium membership. Would you like to avail it?");
-    },
-    function (session,results) {
-       var decision=results.response;
-       if(session.message.text == 'YES'){
-         builder.Prompts.text(session, "Thanks for availing the offer. Please provide your feedback or how would like us to help you in any ways");
        }else{
-         builder.Prompts.text(session, "We would be at your service 24/7. Please provide your feedback or how would like us to help you in any ways");
-       }
+		    session.conversationData.lastops='customerchosennottoescalate';
+		   session.send('Thank you for contacting us.');
+		  
+			session.endDialog();
+	   }
+	   
 
     }
 ]);
+
+
 
 bot.dialog('NotAngryDuetoDelay', [
     function (session) {
         session.send("Customer satisfaction is our top priority. We are striving hard. We would like to offer $50 voucher. You would receive e-mail with details soon");
-        builder.Prompts.text(session,"Please provide your feedback or how would like us to help you in any ways");
+        session.send("Please provide your feedback or how would like us to help you in any ways");
+		session.endDialog();
     }
 ]);
 
 bot.dialog('handleAddressChange', [
     function (session) {
+		session.conversationData.lastops='startedaddresschange';
        builder.Prompts.text(session, "Please enter the new address to which you would like to ship your product(Enter in a signle line)");
     },
     function (session,results) {
+		session.conversationData.lastops='endedaddresschange';
        session.send('Your order will be delivered to your new address.');
 	   session.send('Thank you for contacting us.');
 	   //session.endConversation();
-	   session.beginDialog("generalConversationNew");
+	   session.endDialog();
 
     }
 ]).triggerAction({
@@ -931,10 +722,28 @@ bot.dialog('handleAddressChange', [
     }
 });
 
+bot.dialog('handlePositiveFeedback', [
+    function (session) {
+		session.conversationData.lastops='feedbackpositive';
+       session.send("I am glad that I am able to help you. If you have any more assistance, I would be happy to help");
+	   session.endDialog();
+    }
+]);
+/*
+bot.dialog('handleNegativeFeedback', [
+    function (session) {
+		session.conversationData.lastops='negativefeedback';
+       session.send("I am glad that I am able to help you. If you have any more assistance, I would be happy to help");
+	   session.endDialog();
+    }
+]);
+*/
 bot.dialog('handleOfferRequests', [
     function (session) {
        //builder.Prompts.text(session, "Please enter the new address to which you would like to ship your product(Enter in a signle line)");
+	   session.conversationData.lastops='showoffers';
 	   session.send("Following offers are currently available 1. 10% off on all purchases above $200. 2. Free next day delivery on all orders above $100 3.Free shipping on all orders above $75");
+	   session.endDialog();
     }
 ]).triggerAction({
     matches: [/offer/i,/offer available/i, /offers available/i, /active offers/i,/active offer/i],
@@ -945,19 +754,81 @@ bot.dialog('handleOfferRequests', [
 
 bot.dialog('NA', [
     function (session) {
-       //builder.Prompts.text(session, "Please enter the new address to which you would like to ship your product(Enter in a signle line)");
-	   session.send("We are sorry, you have typed a request we could not help you");
-	   session.send("Please type a question related to your jcrew.com experience");
-	   //session.endConversation();
-	   session.endDialog();
+		
+		if(session.conversationData.lastops == 'ClosingNotes_Happy' || session.message.text.toUpperCase() == 'OK'){
+					session.send("Thanks");
+					session.endDialog();
+		}else{
+			
+			session.conversationData.lastops='handleNA';
+		
+			//builder.Prompts.text(session, "Please enter the new address to which you would like to ship your product(Enter in a signle line)");
+			session.send("We are sorry, you have typed a request we could not help you");
+			session.send("Please type a question related to your jcrew.com experience");
+			//session.endConversation();
+			session.endDialog();
+		}
     }
 ]);
 
+bot.dialog('handleMonologue', [
+    function (session) {
+		
+		
+			session.conversationData.lastops='monologue';
+		
+			//builder.Prompts.text(session, "Please enter the new address to which you would like to ship your product(Enter in a signle line)");
+			session.send("...");
+			//session.send("Please type a question related to your jcrew.com experience");
+			//session.endConversation();
+			session.endDialog();
+		
+    }
+]);
+
+bot.dialog('handleunsupportedops', [
+    function (session) {
+		
+		
+			session.conversationData.lastops='unsupportedops';
+		
+			//builder.Prompts.text(session, "Please enter the new address to which you would like to ship your product(Enter in a signle line)");
+			session.send("Sorry, currently we can help you in order status check, order cancellation and address change.");
+			session.send("Soon we will be able to help in your request. ");
+			 session.send('You may contact 1-434-385-5775 for your request');
+			//session.send("Please type a question related to your jcrew.com experience");
+			//session.endConversation();
+			session.endDialog();
+		
+    }
+]);
+
+bot.dialog('whatcanyoudo', [
+    function (session) {
+		
+		
+			session.conversationData.lastops='whatcanyoudo';
+		
+			//builder.Prompts.text(session, "Please enter the new address to which you would like to ship your product(Enter in a signle line)");
+			session.send("I can help you in order status check, order cancellation and address change.");
+		
+			//session.send("Please type a question related to your jcrew.com experience");
+			//session.endConversation();
+			session.endDialog();
+		
+    }
+]);
+
+ 
+
+
 bot.dialog('handleIntroduction', [
     function (session) {
+		session.conversationData.lastops='handleIntroduction';
        //builder.Prompts.text(session, "Please enter the new address to which you would like to ship your product(Enter in a signle line)");
 	   session.send("Please let us know how we can help you. We can help you to improve youe shopping experience with jcrew.com");
 	  // session.send("Please type a question related to your jcrew.com experience");
+	  session.endDialog();
     }
 ]);
 
@@ -1022,8 +893,8 @@ function getDialogForIntent(intentVal){
     chosendialog='productNotRequired';
   }
   if (intentVal == 'ReturnAndCancellation'){
-    //chosendialog='handleOrderCancellation';
-	chosendialog='handleOrderCancellationNoOrderNumber';
+    chosendialog='handleOrderCancellation';
+	//chosendialog='handleOrderCancellationNoOrderNumber';
   }
   if(intentVal == 'OrderStatus'){
     chosendialog='handleProductStatus';
@@ -1031,6 +902,31 @@ function getDialogForIntent(intentVal){
   if(intentVal == 'Introduction'){
     chosendialog='handleIntroduction';
   }
+  if(intentVal == 'NA'){
+    chosendialog='NA';
+  }
+  if(intentVal == 'ClosingNotes_Happy' ){
+	  chosendialog='handlePositiveFeedback';
+  }
+  if(intentVal == 'ClosingNotes_UnHappy'  || intentVal =='ShowingSignsOfLeaving' || intentVal =='Escalation' || intentVal =='Delay_Angry'){
+	  chosendialog='handleEscalationOption';
+  }
+  if(intentVal == 'offers' ){
+	  chosendialog='handleOfferRequests';
+  }
+  if(intentVal == 'thinkingmonologue' ){
+	  chosendialog='handleMonologue';
+  } 
+  if(intentVal == 'unsupportedoperations' ){
+	  chosendialog='handleunsupportedops';
+  }
+   if(intentVal == 'whatcanyoudo' ){
+	  chosendialog='whatcanyoudo';
+  }
+   
+  
+  
+   
   return chosendialog;
 }
 
@@ -1070,9 +966,10 @@ function createThumbnailCardForProducts(session,url,titleText,priceValue,pageUrl
 
 function handleIntentForMessages(session){
 	
-		var intent='';
+		var intent='NA';
+		
 		LUISclient.predict(session.message.text, {
-
+			
 				//On success of prediction
 					onSuccess: function (response) {
 					intent = response.topScoringIntent.intent;
@@ -1083,46 +980,58 @@ function handleIntentForMessages(session){
 					
 					
 					console.log('intent received is %s',response.topScoringIntent.intent);
+					
 					console.log('Intent is:. %s',intent);
 					if(score < 0.4){
-						session.beginDialog('NA');
-					}else{
+						console.log('Setting intent to NA as score of top scoring intetnt is %s',score);
+						intent='NA';
+					}
 						var dialog=getDialogForIntent(intent);
 						session.beginDialog(dialog);
-					}
-					
-				/*	console.log('Intent is:. %s',intent);
-          if(intent == 'offers'){
-            session.send(getTextForIntent("offers"));
-          }
-					else if (intent == 'ReturnAndCancellation'){
-						//session.beginDialog('handleOrderCancellationSimplified');
-						session.beginDialog('handleOrderCancellationSimplified');
-					}else if (intent == 'OrderStatus'){
-            session.beginDialog('handleProductStatus');
-          }
-          else{
-						var cards = new Array();
-						cards.push(createThumbnailCard(session, "images/customerservice.jpg",'', 'customerService','Customer Service- Refund, Cancel, Order Status Inquiry','Initiate Service Request'));
-						cards.push(createThumbnailCard(session, 'http://www.woodtel.com/thumbnail.jpg','', 'initiateBrowsing','Browse and Shop for Products','Shop Now'));
-						var reply = new builder.Message(session)
-						.text('Type your questions and we will help you')
-					//	.attachmentLayout(builder.AttachmentLayout.list)
-					//	.attachments(cards);
-						session.send(reply);
-					}
-
-					//printOnSuccess(response);*/
-					
-
-			},
+					},
 
 			//On failure of prediction
 					onFailure: function (err) {
 					console.error(err);
-			}
+				}
+		});
+		
+}
+
+
+function getIntentForMessage(session){
+		
+		
+		LUISclient.predict(session.message.text, {
+					
+				//On success of prediction
+					onSuccess: function (response) {
+						var intent='NA';
+					intent = response.topScoringIntent.intent;
+					console.log('Response is');
+					console.log(response.topScoringIntent);
+					console.log(response)
+					var score= response.topScoringIntent.score;
+					
+					
+					console.log('intent received in getIntentForMessage is %s',response.topScoringIntent.intent);
+					
+					console.log('Intent getIntentForMessage is:. %s',intent);
+					if(score < 0.4){
+						console.log('Setting intent in getIntentForMessage to NA as score of top scoring intetnt is %s',score);
+						intent='NA';
+					}
+					return intent;
+					},
+
+			//On failure of prediction
+					onFailure: function (err) {
+					console.error(err);
+					var intent='NA';
+				}
 		});
 }
+
 
 bot.beginDialogAction('initiateBrowsing', '/initiateBrowsing');
 bot.beginDialogAction('customerService', '/customerService');

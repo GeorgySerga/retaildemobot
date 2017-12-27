@@ -82,7 +82,7 @@ var bot = new builder.UniversalBot(connector, [
 							console.log('intent received in start is %s',response.topScoringIntent.intent);
 							
 							console.log('Intent start is:. %s',intent);
-							if(score < 0.4){
+							if(score < 0.2){
 								console.log('Setting intent in start to NA as score of top scoring intetnt is %s',score);
 								intent='NA';
 							}
@@ -982,7 +982,7 @@ function handleIntentForMessages(session){
 					console.log('intent received is %s',response.topScoringIntent.intent);
 					
 					console.log('Intent is:. %s',intent);
-					if(score < 0.4){
+					if(score < 0.2){
 						console.log('Setting intent to NA as score of top scoring intetnt is %s',score);
 						intent='NA';
 					}
@@ -1017,7 +1017,7 @@ function getIntentForMessage(session){
 					console.log('intent received in getIntentForMessage is %s',response.topScoringIntent.intent);
 					
 					console.log('Intent getIntentForMessage is:. %s',intent);
-					if(score < 0.4){
+					if(score < 0.2){
 						console.log('Setting intent in getIntentForMessage to NA as score of top scoring intetnt is %s',score);
 						intent='NA';
 					}
